@@ -10,7 +10,7 @@
 
 /* =========================================================
    DNMS ADMIN
-   MATCHES THE MAIN DNMS LIQUID GLASS DESIGN
+   BEIGE LIQUID GLASS + BURGUNDY
 ========================================================= */
 
 :root {
@@ -19,11 +19,11 @@
     --burgundy: #5a1b2d;
     --burgundy-soft: #70283d;
 
+    --cream: #f7ead3;
+    --cream-bright: #fff5e3;
+
     --text-dark: #302925;
     --text-soft: #716861;
-
-    --glass: rgba(255,255,255,0.30);
-    --glass-light: rgba(255,255,255,0.42);
 
     --glass-border: rgba(255,255,255,0.82);
 
@@ -178,6 +178,10 @@ body::after {
 }
 
 
+/* =========================================================
+   HEADER BRANDING
+========================================================= */
+
 #branding h1 {
 
     color:
@@ -197,6 +201,10 @@ body::after {
 }
 
 
+/* =========================================================
+   USER TOOLS
+========================================================= */
+
 #user-tools {
 
     color:
@@ -205,7 +213,11 @@ body::after {
 }
 
 
-#user-tools a {
+/* View Site / Change Password */
+
+#user-tools a,
+#user-tools a:link,
+#user-tools a:visited {
 
     color:
         var(--burgundy) !important;
@@ -216,8 +228,78 @@ body::after {
 }
 
 
+#user-tools a:hover {
+
+    color:
+        var(--burgundy-dark) !important;
+
+}
+
+
 /* =========================================================
-   MAIN AREA
+   LOGOUT
+   Django uses a FORM + BUTTON for logout
+========================================================= */
+
+#user-tools #logout-form {
+
+    display:
+        inline !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
+}
+
+
+#user-tools #logout-form button {
+
+    color:
+        var(--burgundy) !important;
+
+    background:
+        transparent !important;
+
+    border:
+        none !important;
+
+    padding:
+        0 !important;
+
+    margin:
+        0 !important;
+
+    font-family:
+        inherit !important;
+
+    font-size:
+        inherit !important;
+
+    font-weight:
+        800 !important;
+
+    cursor:
+        pointer !important;
+
+}
+
+
+#user-tools #logout-form button:hover {
+
+    color:
+        var(--burgundy-dark) !important;
+
+    background:
+        transparent !important;
+
+}
+
+
+/* =========================================================
+   MAIN CONTENT
 ========================================================= */
 
 #content {
@@ -284,7 +366,9 @@ body::after {
         hidden !important;
 
     box-shadow:
+
         0 18px 45px rgba(80,55,40,0.06),
+
         inset 0 1px 0 rgba(255,255,255,0.75) !important;
 
     margin-bottom:
@@ -294,7 +378,7 @@ body::after {
 
 
 /* =========================================================
-   SUBTLE GLASS REFLECTION
+   GLASS REFLECTION
 ========================================================= */
 
 .module::before {
@@ -330,18 +414,18 @@ body::after {
 
 
 /* =========================================================
-   SECTION HEADERS
-   BURGUNDY BUT NOT GIANT
+   BURGUNDY SECTION HEADERS
+   SOLID BURGUNDY
 ========================================================= */
 
 .module h2,
 .module caption {
 
     background:
-        rgba(90,27,45,0.94) !important;
+        var(--burgundy) !important;
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
     font-weight:
         800 !important;
@@ -362,7 +446,7 @@ body::after {
 .module caption * {
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
 }
 
@@ -372,13 +456,13 @@ body::after {
 .module h2 a:visited {
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
 }
 
 
 /* =========================================================
-   GLASS TABLE
+   TABLE
 ========================================================= */
 
 .module table {
@@ -401,7 +485,7 @@ body::after {
         1px solid rgba(255,255,255,0.40) !important;
 
     transition:
-        0.25s ease !important;
+        background 0.25s ease !important;
 
 }
 
@@ -453,7 +537,7 @@ body::after {
 
 
 /* =========================================================
-   ADD
+   ADD LINK
 ========================================================= */
 
 .addlink,
@@ -493,7 +577,7 @@ body::after {
 
 
 /* =========================================================
-   CHANGE
+   CHANGE LINK
 ========================================================= */
 
 .changelink,
@@ -533,7 +617,9 @@ body::after {
         24px !important;
 
     box-shadow:
+
         0 18px 45px rgba(80,55,40,0.06),
+
         inset 0 1px 0 rgba(255,255,255,0.75) !important;
 
     overflow:
@@ -545,10 +631,10 @@ body::after {
 #content-related h2 {
 
     background:
-        rgba(90,27,45,0.94) !important;
+        var(--burgundy) !important;
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
     font-weight:
         800 !important;
@@ -562,7 +648,7 @@ body::after {
 #content-related h2 * {
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
 }
 
@@ -617,7 +703,7 @@ input[type="button"],
         var(--burgundy) !important;
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
     border:
         1px solid rgba(255,255,255,0.30) !important;
@@ -645,7 +731,7 @@ input[type="button"]:hover {
         var(--burgundy-soft) !important;
 
     color:
-        #fff5e3 !important;
+        var(--cream-bright) !important;
 
 }
 
@@ -660,7 +746,7 @@ input[type="button"]:hover {
         var(--burgundy) !important;
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
     border:
         1px solid rgba(255,255,255,0.30) !important;
@@ -678,6 +764,9 @@ input[type="button"]:hover {
 
     background:
         var(--burgundy-soft) !important;
+
+    color:
+        var(--cream-bright) !important;
 
 }
 
@@ -725,7 +814,9 @@ select:focus {
         none !important;
 
     box-shadow:
+
         0 0 0 3px rgba(90,27,45,0.10),
+
         inset 0 1px 0 rgba(255,255,255,0.85) !important;
 
 }
@@ -755,13 +846,13 @@ fieldset h2 {
         var(--burgundy) !important;
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
 }
 
 
 /* =========================================================
-   HELP / ERROR
+   HELP TEXT
 ========================================================= */
 
 .help,
@@ -772,6 +863,10 @@ fieldset h2 {
 
 }
 
+
+/* =========================================================
+   ERROR
+========================================================= */
 
 .errornote {
 
@@ -845,24 +940,7 @@ fieldset h2 {
 
 
 /* =========================================================
-   REMOVE OLD DJANGO COLORS
-========================================================= */
-
-#header,
-#header *,
-.module,
-.module *,
-#content-related,
-#content-related * {
-
-    --header-bg:
-        transparent !important;
-
-}
-
-
-/* =========================================================
-   FINAL HEADER TEXT
+   FINAL BURGUNDY OVERRIDES
 ========================================================= */
 
 .module h2,
@@ -873,7 +951,7 @@ fieldset h2 {
 #content-related h2 * {
 
     color:
-        #f7ead3 !important;
+        var(--cream) !important;
 
 }
 
