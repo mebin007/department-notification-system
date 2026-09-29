@@ -1,1 +1,1579 @@
-<h1>Department Notification Management System</h1>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DNMS | Department Notification Management System</title>
+
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        :root {
+
+            /* =========================
+               COLORS
+            ========================= */
+
+            --background: #f8f7f4;
+
+            --beige: #eee3d3;
+            --cream: #fffaf2;
+
+            --burgundy: #64152f;
+            --burgundy-dark: #501025;
+
+            --text: #302722;
+            --muted: #716862;
+
+
+            /* =========================
+               LIQUID GLASS
+            ========================= */
+
+            --glass: rgba(255, 250, 242, 0.34);
+
+            --glass-light: rgba(255, 252, 247, 0.44);
+
+            --border: rgba(255, 255, 255, 0.82);
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            color: var(--text);
+
+            min-height: 100vh;
+
+            overflow-x: hidden;
+
+
+            /* =====================================
+               MAIN BACKGROUND
+
+               70% OFF-WHITE
+               30% SOFT BEIGE
+            ===================================== */
+
+            background:
+
+                linear-gradient(
+                    135deg,
+                    rgba(238, 227, 211, 0.30),
+                    rgba(255, 255, 255, 0.30)
+                ),
+
+                var(--background);
+        }
+
+
+        /* =========================================
+           VERY SOFT BACKGROUND GLOW
+        ========================================= */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            width: 500px;
+            height: 500px;
+
+            top: -190px;
+            left: -190px;
+
+            background:
+
+                radial-gradient(
+                    circle,
+                    rgba(100, 21, 47, 0.045),
+                    transparent 68%
+                );
+
+            filter: blur(55px);
+
+            pointer-events: none;
+
+            z-index: -2;
+        }
+
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            width: 550px;
+            height: 550px;
+
+            right: -230px;
+            top: 230px;
+
+            background:
+
+                radial-gradient(
+                    circle,
+                    rgba(190, 140, 100, 0.065),
+                    transparent 68%
+                );
+
+            filter: blur(60px);
+
+            pointer-events: none;
+
+            z-index: -2;
+        }
+
+
+        /* =========================================
+           NAVBAR
+        ========================================= */
+
+        nav {
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 1000;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 18px 7%;
+
+
+            background:
+                rgba(255, 250, 242, 0.48);
+
+            backdrop-filter:
+                blur(24px)
+                saturate(115%);
+
+            -webkit-backdrop-filter:
+                blur(24px)
+                saturate(115%);
+
+
+            border-bottom:
+                1px solid
+                rgba(255, 255, 255, 0.85);
+
+
+            box-shadow:
+
+                0 8px 30px
+                rgba(80, 35, 25, 0.035),
+
+                inset 0 1px 0
+                rgba(255,255,255,0.90);
+        }
+
+
+        .logo {
+
+            font-size: 24px;
+
+            font-weight: 800;
+
+            letter-spacing: 2px;
+
+            color:
+                var(--burgundy);
+        }
+
+
+        .logo span {
+
+            color:
+                var(--burgundy);
+        }
+
+
+        .nav-links {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 30px;
+
+            list-style: none;
+        }
+
+
+        .nav-links a {
+
+            color:
+                #5e554f;
+
+            text-decoration: none;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            transition: 0.3s;
+        }
+
+
+        .nav-links a:hover {
+
+            color:
+                var(--burgundy);
+        }
+
+
+        .login-btn {
+
+            padding:
+                11px 21px;
+
+            border-radius:
+                14px;
+
+            background:
+                var(--burgundy);
+
+            color:
+                var(--cream) !important;
+
+            box-shadow:
+
+                0 8px 22px
+                rgba(100, 21, 47, 0.17);
+
+            transition:
+                0.3s;
+        }
+
+
+        .login-btn:hover {
+
+            background:
+                var(--burgundy-dark);
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+
+                0 12px 28px
+                rgba(100, 21, 47, 0.22);
+        }
+
+
+        /* =========================================
+           HERO
+        ========================================= */
+
+        .hero {
+
+            position: relative;
+
+            min-height: 600px;
+
+            padding:
+                105px 7%
+                90px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 70px;
+        }
+
+
+        .hero-content {
+
+            max-width: 700px;
+        }
+
+
+        /* =========================================
+           BADGE
+        ========================================= */
+
+        .badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            padding:
+                10px 17px;
+
+            border:
+                1px solid
+                rgba(255,255,255,0.90);
+
+            background:
+                rgba(255,250,242,0.30);
+
+            backdrop-filter:
+                blur(18px)
+                saturate(120%);
+
+            -webkit-backdrop-filter:
+                blur(18px)
+                saturate(120%);
+
+            border-radius:
+                50px;
+
+            color:
+                var(--burgundy);
+
+            font-size:
+                12px;
+
+            font-weight:
+                700;
+
+            letter-spacing:
+                1px;
+
+            text-transform:
+                uppercase;
+
+            margin-bottom:
+                30px;
+
+            box-shadow:
+
+                inset 0 1px 0
+                rgba(255,255,255,0.95),
+
+                0 8px 25px
+                rgba(80,35,25,0.035);
+        }
+
+
+        .badge::before {
+
+            content: "";
+
+            width: 8px;
+
+            height: 8px;
+
+            border-radius: 50%;
+
+            background:
+                var(--burgundy);
+
+            box-shadow:
+                0 0 9px
+                rgba(100,21,47,0.25);
+        }
+
+
+        /* =========================================
+           HERO TITLE
+        ========================================= */
+
+        .hero h1 {
+
+            font-size:
+                clamp(42px, 6vw, 68px);
+
+            line-height:
+                1.02;
+
+            letter-spacing:
+                -2.5px;
+
+            margin-bottom:
+                28px;
+
+            color:
+                #302722;
+        }
+
+
+        .hero h1 span {
+
+            display:
+                block;
+
+            color:
+                var(--burgundy);
+        }
+
+
+        .hero p {
+
+            color:
+                var(--muted);
+
+            font-size:
+                17px;
+
+            line-height:
+                1.8;
+
+            max-width:
+                650px;
+
+            margin-bottom:
+                38px;
+        }
+
+
+        /* =========================================
+           BUTTONS
+        ========================================= */
+
+        .hero-buttons {
+
+            display:
+                flex;
+
+            gap:
+                15px;
+
+            flex-wrap:
+                wrap;
+        }
+
+
+        .primary-btn,
+        .secondary-btn {
+
+            text-decoration:
+                none;
+
+            padding:
+                15px 25px;
+
+            border-radius:
+                14px;
+
+            font-size:
+                14px;
+
+            font-weight:
+                700;
+
+            transition:
+                0.3s;
+        }
+
+
+        .primary-btn {
+
+            color:
+                var(--cream);
+
+            background:
+                var(--burgundy);
+
+            box-shadow:
+
+                0 10px 25px
+                rgba(100,21,47,0.18);
+        }
+
+
+        .primary-btn:hover {
+
+            background:
+                var(--burgundy-dark);
+
+            transform:
+                translateY(-3px);
+
+            box-shadow:
+
+                0 15px 30px
+                rgba(100,21,47,0.23);
+        }
+
+
+        .secondary-btn {
+
+            color:
+                var(--burgundy);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.90);
+
+            background:
+                rgba(255,250,242,0.30);
+
+            backdrop-filter:
+                blur(18px)
+                saturate(115%);
+
+            -webkit-backdrop-filter:
+                blur(18px)
+                saturate(115%);
+
+            box-shadow:
+
+                inset 0 1px 0
+                rgba(255,255,255,0.92);
+        }
+
+
+        .secondary-btn:hover {
+
+            background:
+                rgba(255,250,242,0.43);
+
+            transform:
+                translateY(-3px);
+        }
+
+
+        /* =========================================
+           GLASS UPDATE CARD
+        ========================================= */
+
+        .hero-card {
+
+            position:
+                relative;
+
+            width:
+                390px;
+
+            padding:
+                28px;
+
+            border-radius:
+                26px;
+
+            background:
+                rgba(255,250,242,0.34);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.88);
+
+            backdrop-filter:
+                blur(28px)
+                saturate(125%);
+
+            -webkit-backdrop-filter:
+                blur(28px)
+                saturate(125%);
+
+            box-shadow:
+
+                0 25px 70px
+                rgba(80,35,25,0.075),
+
+                inset 0 1px 0
+                rgba(255,255,255,0.95),
+
+                inset 0 -1px 0
+                rgba(255,255,255,0.35);
+        }
+
+
+        .hero-card::before {
+
+            content:
+                "";
+
+            position:
+                absolute;
+
+            width:
+                120px;
+
+            height:
+                120px;
+
+            top:
+                -40px;
+
+            right:
+                -25px;
+
+            background:
+                rgba(110,35,60,0.045);
+
+            filter:
+                blur(45px);
+
+            border-radius:
+                50%;
+
+            pointer-events:
+                none;
+        }
+
+
+        .hero-card h3 {
+
+            font-size:
+                20px;
+
+            color:
+                var(--burgundy);
+
+            margin-bottom:
+                22px;
+
+            position:
+                relative;
+        }
+
+
+       /* =========================================
+   LIQUID GLASS NOTIFICATION BOXES
+========================================= */
+
+.notification-preview {
+
+    position: relative;
+
+    padding: 17px;
+
+    margin-bottom: 13px;
+
+    border-radius: 16px;
+
+    /* Much more transparent */
+    background:
+        rgba(255, 255, 255, 0.16);
+
+    /* Bright glass edge */
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.78);
+
+    /* Actual glass effect */
+    backdrop-filter:
+        blur(22px)
+        saturate(135%);
+
+    -webkit-backdrop-filter:
+        blur(22px)
+        saturate(135%);
+
+    /* Soft glass depth */
+    box-shadow:
+
+        inset 0 1px 0
+        rgba(255,255,255,0.90),
+
+        inset 0 -1px 0
+        rgba(255,255,255,0.22),
+
+        0 8px 25px
+        rgba(80,35,25,0.035);
+
+    transition:
+        0.3s;
+}
+
+
+/* =========================================
+   SUBTLE GLASS REFLECTION
+========================================= */
+
+.notification-preview::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 8%;
+
+    width: 84%;
+    height: 1px;
+
+    background:
+        rgba(255,255,255,0.85);
+
+    opacity: 0.7;
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   HOVER REFRACTION
+========================================= */
+
+.notification-preview:hover {
+
+    background:
+        rgba(255, 255, 255, 0.24);
+
+    border-color:
+        rgba(255,255,255,0.92);
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+
+        inset 0 1px 0
+        rgba(255,255,255,0.95),
+
+        0 12px 30px
+        rgba(80,35,25,0.06);
+}
+
+
+/* =========================================
+   TEXT
+========================================= */
+
+.notification-preview strong {
+
+    position: relative;
+
+    z-index: 1;
+
+    font-size: 14px;
+
+    color:
+        #3a2d28;
+}
+
+
+.notification-preview small {
+
+    position: relative;
+
+    z-index: 1;
+
+    display: block;
+
+    margin-top: 7px;
+
+    color:
+        #716862;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+        /* =========================================
+           STATS
+        ========================================= */
+
+        .stats {
+
+            max-width:
+                1100px;
+
+            margin:
+                -20px auto 0;
+
+            padding:
+                0 20px;
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap:
+                18px;
+
+            position:
+                relative;
+        }
+
+
+        .stat-card {
+
+            padding:
+                28px;
+
+            text-align:
+                center;
+
+            border-radius:
+                20px;
+
+            background:
+                rgba(255,250,242,0.30);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.84);
+
+            backdrop-filter:
+                blur(25px)
+                saturate(120%);
+
+            -webkit-backdrop-filter:
+                blur(25px)
+                saturate(120%);
+
+            box-shadow:
+
+                0 15px 40px
+                rgba(80,35,25,0.045),
+
+                inset 0 1px 0
+                rgba(255,255,255,0.92);
+
+            transition:
+                0.3s;
+        }
+
+
+        .stat-card:hover {
+
+            transform:
+                translateY(-4px);
+
+            background:
+                rgba(255,250,242,0.40);
+        }
+
+
+        .stat-card .number {
+
+            font-size:
+                32px;
+
+            font-weight:
+                800;
+
+            color:
+                var(--burgundy);
+
+            margin-bottom:
+                7px;
+        }
+
+
+        .stat-card p {
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
+            font-weight:
+                600;
+        }
+
+
+        /* =========================================
+           FEATURES
+        ========================================= */
+
+        .section {
+
+            padding:
+                115px 7%;
+        }
+
+
+        .section-title {
+
+            text-align:
+                center;
+
+            margin-bottom:
+                50px;
+        }
+
+
+        .section-title h2 {
+
+            font-size:
+                35px;
+
+            color:
+                #302722;
+
+            margin-bottom:
+                13px;
+        }
+
+
+        .section-title p {
+
+            color:
+                var(--muted);
+
+            font-size:
+                14px;
+        }
+
+
+        .features {
+
+            max-width:
+                1100px;
+
+            margin:
+                auto;
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap:
+                20px;
+        }
+
+
+        .feature-card {
+
+            padding:
+                31px;
+
+            border-radius:
+                21px;
+
+            background:
+                rgba(255,250,242,0.30);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.84);
+
+            backdrop-filter:
+                blur(25px)
+                saturate(120%);
+
+            -webkit-backdrop-filter:
+                blur(25px)
+                saturate(120%);
+
+            transition:
+                0.35s;
+
+            box-shadow:
+
+                0 15px 45px
+                rgba(80,35,25,0.045),
+
+                inset 0 1px 0
+                rgba(255,255,255,0.90);
+        }
+
+
+        .feature-card:hover {
+
+            transform:
+                translateY(-7px);
+
+            background:
+                rgba(255,250,242,0.40);
+
+            border-color:
+                rgba(255,255,255,0.96);
+
+            box-shadow:
+
+                0 22px 55px
+                rgba(80,35,25,0.075),
+
+                inset 0 1px 0
+                rgba(255,255,255,0.96);
+        }
+
+
+        /* =========================================
+           ICON
+        ========================================= */
+
+        .icon {
+
+            width:
+                50px;
+
+            height:
+                50px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            border-radius:
+                15px;
+
+            background:
+                rgba(100,21,47,0.055);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.78);
+
+            margin-bottom:
+                21px;
+
+            font-size:
+                21px;
+
+            box-shadow:
+
+                inset 0 1px 0
+                rgba(255,255,255,0.85);
+        }
+
+
+        .feature-card h3 {
+
+            font-size:
+                18px;
+
+            color:
+                var(--burgundy);
+
+            margin-bottom:
+                11px;
+        }
+
+
+        .feature-card p {
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
+            line-height:
+                1.75;
+        }
+
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        footer {
+
+            padding:
+                32px;
+
+            text-align:
+                center;
+
+            border-top:
+                1px solid
+                rgba(255,255,255,0.78);
+
+            background:
+                rgba(255,250,242,0.22);
+
+            backdrop-filter:
+                blur(18px);
+
+            -webkit-backdrop-filter:
+                blur(18px);
+        }
+
+
+        footer p {
+
+            color:
+                #81766e;
+
+            font-size:
+                11px;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 850px) {
+
+            .nav-links {
+
+                gap:
+                    13px;
+            }
+
+
+            .hero {
+
+                flex-direction:
+                    column;
+
+                text-align:
+                    center;
+
+                padding:
+                    80px 5%;
+            }
+
+
+            .hero-content {
+
+                max-width:
+                    700px;
+            }
+
+
+            .hero-buttons {
+
+                justify-content:
+                    center;
+            }
+
+
+            .hero-card {
+
+                width:
+                    100%;
+
+                max-width:
+                    420px;
+            }
+
+
+            .stats {
+
+                grid-template-columns:
+                    1fr;
+
+                margin-top:
+                    25px;
+            }
+
+
+            .features {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+
+        @media (max-width: 550px) {
+
+            nav {
+
+                padding:
+                    16px 5%;
+            }
+
+
+            .logo {
+
+                font-size:
+                    20px;
+            }
+
+
+            .nav-links {
+
+                gap:
+                    8px;
+            }
+
+
+            .nav-links a {
+
+                font-size:
+                    11px;
+            }
+
+
+            .login-btn {
+
+                padding:
+                    9px 13px;
+            }
+
+
+            .hero h1 {
+
+                font-size:
+                    42px;
+
+                letter-spacing:
+                    -1.5px;
+            }
+
+
+            .hero p {
+
+                font-size:
+                    15px;
+            }
+
+
+            .section {
+
+                padding:
+                    80px 5%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         NAVIGATION
+    ========================================== -->
+
+    <nav>
+
+        <div class="logo">
+            DN<span>MS</span>
+        </div>
+
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="/">
+                    Home
+                </a>
+            </li>
+
+
+            <li>
+                <a href="/departments/">
+                    Departments
+                </a>
+            </li>
+
+
+            <li>
+                <a href="/notifications/">
+                    Notifications
+                </a>
+            </li>
+
+
+            <li>
+                <a
+                    href="/login/"
+                    class="login-btn"
+                >
+                    Login
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+    <!-- =========================================
+         HERO
+    ========================================== -->
+
+    <section class="hero">
+
+
+        <div class="hero-content">
+
+
+            <div class="badge">
+
+                Department Communication Platform
+
+            </div>
+
+
+            <h1>
+
+                Department Notification
+
+                <span>
+                    Management System
+                </span>
+
+            </h1>
+
+
+            <p>
+
+                A centralized platform for managing and accessing
+                important department announcements, academic updates,
+                examinations and college events.
+
+            </p>
+
+
+            <div class="hero-buttons">
+
+
+                <a
+                    href="/notifications/"
+                    class="primary-btn"
+                >
+                    View Notifications
+                </a>
+
+
+                <a
+                    href="/departments/"
+                    class="secondary-btn"
+                >
+                    Explore Departments
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             LATEST UPDATES
+        ========================================== -->
+
+        <div class="hero-card">
+
+
+            <h3>
+                🔔 Latest Updates
+            </h3>
+
+
+            <div class="notification-preview">
+
+                <strong>
+                    Examination Schedule
+                </strong>
+
+                <small>
+                    Important academic examination updates
+                </small>
+
+            </div>
+
+
+            <div class="notification-preview">
+
+                <strong>
+                    Assignment Notice
+                </strong>
+
+                <small>
+                    New department announcement
+                </small>
+
+            </div>
+
+
+            <div class="notification-preview">
+
+                <strong>
+                    College Event
+                </strong>
+
+                <small>
+                    Upcoming academic activity
+                </small>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         STATISTICS
+    ========================================== -->
+
+    <section class="stats">
+
+
+        <div class="stat-card">
+
+            <div class="number">
+                8+
+            </div>
+
+            <p>
+                Departments
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="number">
+                100+
+            </div>
+
+            <p>
+                Notifications
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="number">
+                1000+
+            </div>
+
+            <p>
+                Students
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- =========================================
+         FEATURES
+    ========================================== -->
+
+    <section class="section">
+
+
+        <div class="section-title">
+
+            <h2>
+                Everything in One Place
+            </h2>
+
+            <p>
+                A modern communication platform for students and departments.
+            </p>
+
+        </div>
+
+
+        <div class="features">
+
+
+            <div class="feature-card">
+
+                <div class="icon">
+                    🔔
+                </div>
+
+                <h3>
+                    Instant Notifications
+                </h3>
+
+                <p>
+                    Students can easily access important
+                    announcements and academic updates
+                    from their departments.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="icon">
+                    🏢
+                </div>
+
+                <h3>
+                    Department Management
+                </h3>
+
+                <p>
+                    Organize notifications and information
+                    according to individual academic departments.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="icon">
+                    🔐
+                </div>
+
+                <h3>
+                    Secure Access
+                </h3>
+
+                <p>
+                    Login-based access helps provide
+                    appropriate features for students
+                    and administrators.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
+
+    <footer>
+
+        <p>
+            © 2026 Department Notification Management System
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>
