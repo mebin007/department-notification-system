@@ -272,7 +272,7 @@
 
 
         /* =========================================================
-           LOGIN BUTTON
+           LOGIN / LOGOUT BUTTON
         ========================================================= */
 
         .login-btn {
@@ -1052,11 +1052,29 @@
             </li>
 
 
-            <li>
-                <a href="/login/" class="login-btn">
-                    Login
-                </a>
-            </li>
+            {% if user.is_authenticated %}
+
+                <li>
+                    <a href="/dashboard/">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/logout/" class="login-btn">
+                        Logout
+                    </a>
+                </li>
+
+            {% else %}
+
+                <li>
+                    <a href="/login/" class="login-btn">
+                        Login
+                    </a>
+                </li>
+
+            {% endif %}
 
         </ul>
 
