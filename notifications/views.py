@@ -21,6 +21,7 @@ def dashboard(request):
     return render(request, 'dashboard.html')
 
 
+@login_required
 def notifications(request):
 
     if request.user.is_authenticated:
