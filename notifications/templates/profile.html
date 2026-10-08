@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile | DNMS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 20% 20%,
+                    rgba(128, 0, 32, 0.08),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 80% 80%,
+                    rgba(180, 150, 100, 0.15),
+                    transparent 30%
+                ),
+                #f7f2e8;
+
+            color: #5b1025;
+        }
+
+        nav {
+            padding: 20px 8%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 800;
+            color: #6b1028;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #6b1028;
+            font-weight: 700;
+        }
+
+        .logout {
+            background: #6b1028;
+            color: white !important;
+            padding: 9px 16px;
+            border-radius: 10px;
+        }
+
+        .container {
+            min-height: calc(100vh - 80px);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 30px 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 600px;
+
+            padding: 42px;
+
+            border-radius: 28px;
+
+            background: rgba(255, 255, 255, 0.48);
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            border: 1px solid rgba(255, 255, 255, 0.75);
+
+            box-shadow:
+                0 20px 50px rgba(91, 16, 37, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+            color: #6b1028;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #765b62;
+            margin-bottom: 32px;
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 17px 0;
+
+            border-bottom: 1px solid rgba(91, 16, 37, 0.12);
+        }
+
+        .profile-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 700;
+            color: #765b62;
+        }
+
+        .value {
+            font-weight: 700;
+            color: #5b1025;
+            text-align: right;
+        }
+
+        .edit-button {
+            display: block;
+
+            margin-top: 30px;
+
+            padding: 14px;
+
+            text-align: center;
+            text-decoration: none;
+
+            border-radius: 12px;
+
+            background: #6b1028;
+            color: white;
+
+            font-weight: 700;
+        }
+
+        .edit-button:hover {
+            background: #4f0b1d;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px;
+
+            border-radius: 10px;
+
+            background: rgba(215, 245, 220, 0.8);
+            color: #245c32;
+
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+
+            nav {
+                padding: 18px 5%;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .nav-links a {
+                font-size: 13px;
+            }
+
+            .card {
+                padding: 28px 22px;
+            }
+
+            .profile-row {
+                gap: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <nav>
+
+        <div class="logo">
+            DNMS
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/dashboard/">
+                Dashboard
+            </a>
+
+            <a href="/notifications/">
+                Notifications
+            </a>
+
+            <a href="/logout/" class="logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="card">
+
+            <h1>
+                My Profile
+            </h1>
+
+            <p class="subtitle">
+                Your student information
+            </p>
+
+
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for message in messages %}
+
+                        <div class="message">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="profile-row">
+
+                <span class="label">
+                    Username
+                </span>
+
+                <span class="value">
+                    {{ request.user.username }}
+                </span>
+
+            </div>
+
+
+            <div class="profile-row">
+
+                <span class="label">
+                    Role
+                </span>
+
+                <span class="value">
+                    {{ profile.role }}
+                </span>
+
+            </div>
+
+
+            <div class="profile-row">
+
+                <span class="label">
+                    Department
+                </span>
+
+                <span class="value">
+                    {{ profile.department }}
+                </span>
+
+            </div>
+
+
+            <div class="profile-row">
+
+                <span class="label">
+                    Semester
+                </span>
+
+                <span class="value">
+                    {{ profile.semester }}
+                </span>
+
+            </div>
+
+
+            <a href="/profile/edit/" class="edit-button">
+                Edit Profile
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | DNMS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(128, 0, 32, 0.08), transparent 30%),
+                radial-gradient(circle at 80% 80%, rgba(180, 150, 100, 0.15), transparent 30%),
+                #f7f2e8;
+            color: #5b1025;
+        }
+
+        nav {
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #6b1028;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #6b1028;
+            font-weight: 700;
+        }
+
+        .container {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 25px;
+
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            border: 1px solid rgba(255, 255, 255, 0.7);
+
+            box-shadow:
+                0 20px 50px rgba(91, 16, 37, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            text-align: center;
+            color: #6b1028;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #765b62;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 700;
+            color: #5b1025;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            margin-bottom: 18px;
+
+            border: 1px solid rgba(91, 16, 37, 0.2);
+            border-radius: 12px;
+
+            background: rgba(255, 255, 255, 0.7);
+
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #7b1835;
+            box-shadow: 0 0 0 3px rgba(123, 24, 53, 0.08);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 5px;
+
+            border: none;
+            border-radius: 12px;
+
+            background: #6b1028;
+            color: white;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4f0b1d;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 22px;
+            color: #765b62;
+        }
+
+        .login-link a {
+            color: #6b1028;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(255, 220, 220, 0.8);
+            color: #7a1c1c;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 28px 22px;
+            }
+
+            nav {
+                padding: 18px 5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">DNMS</div>
+        <a href="/login/">Login</a>
+    </nav>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h1>Create Account</h1>
+
+            <p class="subtitle">
+                Create your student account
+            </p>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <label>Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    placeholder="Enter username"
+                    required
+                >
+
+                <label>Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Enter password"
+                    required
+                >
+
+                <label>Department</label>
+                <select name="department" required>
+                    <option value="">Select Department</option>
+                    <option value="Computer Applications">
+                        Computer Applications
+                    </option>
+                    <option value="Computer Science">
+                        Computer Science
+                    </option>
+                    <option value="Commerce">
+                        Commerce
+                    </option>
+                    <option value="Electronics">
+                        Electronics
+                    </option>
+                </select>
+
+                <label>Semester</label>
+                <select name="semester" required>
+                    <option value="">Select Semester</option>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                </select>
+
+                <button type="submit">
+                    Create Account
+                </button>
+
+            </form>
+
+            <div class="login-link">
+                Already have an account?
+                <a href="/login/">Login</a>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

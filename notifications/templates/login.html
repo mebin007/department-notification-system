@@ -9,12 +9,7 @@
 
     <title>DNMS | Login</title>
 
-
     <style>
-
-        /* =========================================================
-           RESET
-        ========================================================= */
 
         * {
             margin: 0;
@@ -22,10 +17,6 @@
             box-sizing: border-box;
         }
 
-
-        /* =========================================================
-           VARIABLES
-        ========================================================= */
 
         :root {
 
@@ -45,12 +36,9 @@
 
             --glass-border:
                 rgba(255,255,255,0.78);
+
         }
 
-
-        /* =========================================================
-           BODY
-        ========================================================= */
 
         body {
 
@@ -78,22 +66,19 @@
 
                 #f8f7f4;
 
-            color:
-                var(--text);
+            color: var(--text);
 
             font-family:
                 Arial,
                 Helvetica,
                 sans-serif;
 
-            overflow-x:
-                hidden;
+            overflow-x: hidden;
+
         }
 
 
-        /* =========================================================
-           BACKGROUND LIGHT
-        ========================================================= */
+        /* BACKGROUND LIGHT */
 
         body::before {
 
@@ -116,14 +101,12 @@
                     transparent 68%
                 );
 
-            filter:
-                blur(35px);
+            filter: blur(35px);
 
-            pointer-events:
-                none;
+            pointer-events: none;
 
-            z-index:
-                -1;
+            z-index: -1;
+
         }
 
 
@@ -148,20 +131,16 @@
                     transparent 68%
                 );
 
-            filter:
-                blur(38px);
+            filter: blur(38px);
 
-            pointer-events:
-                none;
+            pointer-events: none;
 
-            z-index:
-                -1;
+            z-index: -1;
+
         }
 
 
-        /* =========================================================
-           NAVBAR
-        ========================================================= */
+        /* NAVBAR */
 
         nav {
 
@@ -196,6 +175,7 @@
             box-shadow:
                 0 8px 30px
                 rgba(70,35,28,0.025);
+
         }
 
 
@@ -215,28 +195,24 @@
             background:
                 rgba(255,255,255,0.82);
 
-            pointer-events:
-                none;
+            pointer-events: none;
+
         }
 
 
-        /* =========================================================
-           LOGO
-        ========================================================= */
+        /* LOGO */
 
         .logo {
 
-            font-size:
-                24px;
+            font-size: 24px;
 
-            font-weight:
-                800;
+            font-weight: 800;
 
-            letter-spacing:
-                2px;
+            letter-spacing: 2px;
 
             color:
                 var(--burgundy-dark);
+
         }
 
 
@@ -244,17 +220,15 @@
 
             color:
                 var(--burgundy-light);
+
         }
 
 
-        /* =========================================================
-           NAVIGATION
-        ========================================================= */
+        /* NAVIGATION */
 
         .nav-links {
 
-            display:
-                flex;
+            display: flex;
 
             align-items:
                 center;
@@ -264,6 +238,7 @@
 
             list-style:
                 none;
+
         }
 
 
@@ -280,6 +255,7 @@
 
             transition:
                 0.25s;
+
         }
 
 
@@ -287,12 +263,11 @@
 
             color:
                 var(--burgundy);
+
         }
 
 
-        /* =========================================================
-           LOGIN NAV BUTTON
-        ========================================================= */
+        /* LOGIN NAV BUTTON */
 
         .login-btn {
 
@@ -314,6 +289,7 @@
             box-shadow:
                 0 7px 18px
                 rgba(90,23,38,0.10);
+
         }
 
 
@@ -324,12 +300,11 @@
 
             transform:
                 translateY(-1px);
+
         }
 
 
-        /* =========================================================
-           LOGIN AREA
-        ========================================================= */
+        /* LOGIN AREA */
 
         .login-wrapper {
 
@@ -347,12 +322,11 @@
 
             padding:
                 70px 20px;
+
         }
 
 
-        /* =========================================================
-           LIQUID GLASS LOGIN CARD
-        ========================================================= */
+        /* LIQUID GLASS LOGIN CARD */
 
         .login-card {
 
@@ -398,12 +372,11 @@
 
             overflow:
                 hidden;
+
         }
 
 
-        /* =========================================================
-           GLASS REFLECTION
-        ========================================================= */
+        /* GLASS REFLECTION */
 
         .login-card::before {
 
@@ -432,12 +405,11 @@
 
             pointer-events:
                 none;
+
         }
 
 
-        /* =========================================================
-           SOFT INTERNAL LIGHT
-        ========================================================= */
+        /* SOFT INTERNAL LIGHT */
 
         .login-card::after {
 
@@ -474,12 +446,11 @@
 
             pointer-events:
                 none;
+
         }
 
 
-        /* =========================================================
-           LOGIN ICON
-        ========================================================= */
+        /* LOGIN ICON */
 
         .login-badge {
 
@@ -534,12 +505,11 @@
 
             font-size:
                 22px;
+
         }
 
 
-        /* =========================================================
-           LOGIN HEADING
-        ========================================================= */
+        /* LOGIN HEADING */
 
         .login-card h1 {
 
@@ -560,6 +530,7 @@
 
             margin-bottom:
                 10px;
+
         }
 
 
@@ -567,12 +538,11 @@
 
             color:
                 var(--burgundy);
+
         }
 
 
-        /* =========================================================
-           SUBTITLE
-        ========================================================= */
+        /* SUBTITLE */
 
         .subtitle {
 
@@ -593,12 +563,11 @@
 
             margin-bottom:
                 30px;
+
         }
 
 
-        /* =========================================================
-           MESSAGES
-        ========================================================= */
+        /* MESSAGES */
 
         .message {
 
@@ -634,12 +603,11 @@
 
             -webkit-backdrop-filter:
                 blur(14px);
+
         }
 
 
-        /* =========================================================
-           FORM
-        ========================================================= */
+        /* FORM */
 
         .form-group {
 
@@ -651,6 +619,7 @@
 
             margin-bottom:
                 18px;
+
         }
 
 
@@ -670,12 +639,11 @@
 
             font-weight:
                 600;
+
         }
 
 
-        /* =========================================================
-           GLASS INPUTS
-        ========================================================= */
+        /* GLASS INPUTS */
 
         .form-group input {
 
@@ -721,6 +689,7 @@
 
             transition:
                 0.25s;
+
         }
 
 
@@ -739,6 +708,7 @@
 
                 0 0 0 3px
                 rgba(90,23,38,0.07);
+
         }
 
 
@@ -746,12 +716,11 @@
 
             color:
                 #9b918a;
+
         }
 
 
-        /* =========================================================
-           SIGN IN BUTTON
-        ========================================================= */
+        /* SIGN IN BUTTON */
 
         .submit-btn {
 
@@ -797,6 +766,7 @@
             box-shadow:
                 0 10px 25px
                 rgba(90,23,38,0.16);
+
         }
 
 
@@ -811,12 +781,122 @@
             box-shadow:
                 0 15px 30px
                 rgba(90,23,38,0.22);
+
         }
 
 
-        /* =========================================================
-           FOOTER
-        ========================================================= */
+        /* ADMIN LOGIN SWITCH */
+
+        .admin-login {
+
+            position:
+                relative;
+
+            z-index:
+                2;
+
+            display:
+                block;
+
+            margin-top:
+                14px;
+
+            padding:
+                12px;
+
+            text-align:
+                center;
+
+            text-decoration:
+                none;
+
+            border:
+                1px solid rgba(90,23,38,0.22);
+
+            border-radius:
+                9px;
+
+            background:
+                rgba(255,255,255,0.18);
+
+            color:
+                var(--burgundy);
+
+            font-size:
+                12px;
+
+            font-weight:
+                700;
+
+            transition:
+                0.25s;
+
+            backdrop-filter:
+                blur(12px);
+
+            -webkit-backdrop-filter:
+                blur(12px);
+
+        }
+
+
+        .admin-login:hover {
+
+            background:
+                rgba(90,23,38,0.08);
+
+            border-color:
+                rgba(90,23,38,0.35);
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        /* CREATE ACCOUNT */
+
+        .register-link {
+
+            position:
+                relative;
+
+            z-index:
+                2;
+
+            display:
+                block;
+
+            margin-top:
+                12px;
+
+            text-align:
+                center;
+
+            color:
+                var(--burgundy);
+
+            text-decoration:
+                none;
+
+            font-size:
+                12px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .register-link:hover {
+
+            text-decoration:
+                underline;
+
+        }
+
+
+        /* FOOTER */
 
         .login-footer {
 
@@ -844,12 +924,11 @@
 
             font-size:
                 11px;
+
         }
 
 
-        /* =========================================================
-           MOBILE
-        ========================================================= */
+        /* MOBILE */
 
         @media (max-width: 600px) {
 
@@ -857,6 +936,7 @@
 
                 padding:
                     15px 5%;
+
             }
 
 
@@ -864,6 +944,7 @@
 
                 gap:
                     8px;
+
             }
 
 
@@ -871,6 +952,7 @@
 
                 font-size:
                     11px;
+
             }
 
 
@@ -878,6 +960,7 @@
 
                 font-size:
                     20px;
+
             }
 
 
@@ -885,6 +968,7 @@
 
                 padding:
                     50px 18px;
+
             }
 
 
@@ -892,6 +976,7 @@
 
                 padding:
                     30px 24px;
+
             }
 
 
@@ -899,6 +984,7 @@
 
                 font-size:
                     28px;
+
             }
 
         }
@@ -911,44 +997,60 @@
 <body>
 
 
-    <!-- =========================================================
-         NAVIGATION
-    ========================================================= -->
+    <!-- NAVIGATION -->
 
     <nav>
 
         <div class="logo">
+
             DN<span>MS</span>
+
         </div>
 
 
         <ul class="nav-links">
 
             <li>
+
                 <a href="/">
+
                     Home
+
                 </a>
+
             </li>
 
 
             <li>
+
                 <a href="/departments/">
+
                     Departments
+
                 </a>
+
             </li>
 
 
             <li>
+
                 <a href="/notifications/">
+
                     Notifications
+
                 </a>
+
             </li>
 
 
             <li>
+
                 <a href="/login/" class="login-btn">
+
                     Login
+
                 </a>
+
             </li>
 
         </ul>
@@ -957,9 +1059,7 @@
 
 
 
-    <!-- =========================================================
-         LOGIN
-    ========================================================= -->
+    <!-- LOGIN -->
 
     <main class="login-wrapper">
 
@@ -967,18 +1067,24 @@
 
 
             <div class="login-badge">
+
                 🔐
+
             </div>
 
 
             <h1>
+
                 Welcome to <span>DNMS</span>
+
             </h1>
 
 
             <p class="subtitle">
+
                 Sign in to access the Department Notification
                 Management System.
+
             </p>
 
 
@@ -987,7 +1093,9 @@
                 {% for message in messages %}
 
                     <div class="message">
+
                         {{ message }}
+
                     </div>
 
                 {% endfor %}
@@ -1003,7 +1111,9 @@
                 <div class="form-group">
 
                     <label for="username">
+
                         Username
+
                     </label>
 
                     <input
@@ -1020,7 +1130,9 @@
                 <div class="form-group">
 
                     <label for="password">
+
                         Password
+
                     </label>
 
                     <input
@@ -1038,14 +1150,38 @@
                     type="submit"
                     class="submit-btn"
                 >
+
                     Sign In
+
                 </button>
 
             </form>
 
 
+            <a
+                href="/admin/login/"
+                class="admin-login"
+            >
+
+                Administrator Login →
+
+            </a>
+
+
+            <a
+                href="/register/"
+                class="register-link"
+            >
+
+                Create Account
+
+            </a>
+
+
             <div class="login-footer">
+
                 Department Notification Management System
+
             </div>
 
 
