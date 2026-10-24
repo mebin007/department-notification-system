@@ -1,3 +1,4 @@
+
 from pathlib import Path
 import os
 import dj_database_url
@@ -23,7 +24,6 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'notifications',
 
@@ -71,7 +71,6 @@ WSGI_APPLICATION = 'college_notification.wsgi.application'
 
 
 # Database
-
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -81,7 +80,6 @@ DATABASES = {
 
 
 # Password validation
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -99,7 +97,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -110,7 +107,6 @@ USE_TZ = True
 
 
 # Static files
-
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -125,6 +121,6 @@ STORAGES = {
 
 
 # Default primary key field type
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 LOGIN_URL = '/login/'

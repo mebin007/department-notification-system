@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management | DNMS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 16px;
+            font-family: Arial, sans-serif;
+            background: #f5f1eb;
+            color: #30252a;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .header {
+            background: #5a1b2d;
+            color: white;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #f0dfe4;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #5a1b2d;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 16px 0 7px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d8c9cc;
+            border-radius: 7px;
+            font-size: 15px;
+            background: white;
+        }
+
+        button, .back-link {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 7px;
+            background: #5a1b2d;
+            color: white;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:hover, .back-link:hover {
+            background: #42121f;
+        }
+
+        .message {
+            padding: 13px;
+            margin-bottom: 12px;
+            border-radius: 7px;
+            background: #f4e8d7;
+            border: 1px solid #e0cfb5;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #eee5e5;
+        }
+
+        th {
+            background: #f5edf0;
+            color: #5a1b2d;
+        }
+
+        .empty {
+            padding: 20px 0;
+            color: #74676b;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px 10px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+
+        <header class="header">
+            <h1>Staff Management</h1>
+            <p>Department-Based Notification Management System</p>
+        </header>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="card">
+            <h2>Create Faculty Account</h2>
+            <p>Use this form to create an account for a faculty member.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required
+                    autocomplete="username"
+                >
+
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    minlength="8"
+                    required
+                    autocomplete="new-password"
+                >
+                <small>Password must contain at least 8 characters.</small>
+
+                <label for="department">Department</label>
+                <select id="department" name="department" required>
+                    <option value="">Select a department</option>
+                    {% for department in departments %}
+                        <option value="{{ department }}">
+                            {{ department }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Create Faculty Account</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Existing Faculty Members</h2>
+
+            {% if staff %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for member in staff %}
+                                <tr>
+                                    <td>{{ member.user.username }}</td>
+                                    <td>{{ member.department }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty">
+                    No faculty accounts have been created yet.
+                </p>
+            {% endif %}
+        </section>
+
+        <a class="back-link" href="{% url 'dashboard' %}">
+            Back to Dashboard
+        </a>
+
+    </main>
+</body>
+</html>

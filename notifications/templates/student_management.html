@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management | DNMS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 16px;
+            font-family: Arial, sans-serif;
+            background: #f5f1eb;
+            color: #30252a;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .header {
+            background: #5a1b2d;
+            color: white;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #f0dfe4;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #5a1b2d;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 16px 0 7px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d8c9cc;
+            border-radius: 7px;
+            font-size: 15px;
+            background: white;
+        }
+
+        button, .back-link {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 11px 17px;
+            border: none;
+            border-radius: 7px;
+            background: #5a1b2d;
+            color: white;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:hover, .back-link:hover {
+            background: #42121f;
+        }
+
+        .approve-button {
+            background: #246b4a;
+        }
+
+        .approve-button:hover {
+            background: #174b33;
+        }
+
+        .message {
+            padding: 13px;
+            margin-bottom: 12px;
+            border-radius: 7px;
+            background: #f4e8d7;
+            border: 1px solid #e0cfb5;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #eee5e5;
+        }
+
+        th {
+            background: #f5edf0;
+            color: #5a1b2d;
+        }
+
+        .empty {
+            padding: 15px 0;
+            color: #74676b;
+        }
+
+        .department-note {
+            padding: 12px;
+            background: #f5edf0;
+            border-radius: 7px;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px 10px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+
+        <header class="header">
+            <h1>Student Management</h1>
+            <p>Manage student accounts and registration approvals</p>
+        </header>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="card">
+            <h2>Create Student Account</h2>
+            <p>Complete the form to create an approved student account.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <input type="hidden" name="action" value="create">
+
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required
+                    autocomplete="username"
+                >
+
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    minlength="8"
+                    required
+                    autocomplete="new-password"
+                >
+                <small>Password must contain at least 8 characters.</small>
+
+                {% if role == 'Admin' %}
+                    <label for="department">Department</label>
+                    <select id="department" name="department" required>
+                        <option value="">Select a department</option>
+                        {% for department in departments %}
+                            <option value="{{ department }}">
+                                {{ department }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <div class="department-note">
+                        <strong>Your department:</strong>
+                        {{ my_department }}
+                    </div>
+                {% endif %}
+
+                <label for="semester">Semester</label>
+                <select id="semester" name="semester" required>
+                    <option value="">Select a semester</option>
+                    {% for semester in semesters %}
+                        <option value="{{ semester }}">
+                            {{ semester }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Create Student Account</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Pending Student Approvals</h2>
+            <p>Review registrations that have not yet been approved.</p>
+
+            {% if pending %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for student in pending %}
+                                <tr>
+                                    <td>{{ student.user.username }}</td>
+                                    <td>{{ student.department }}</td>
+                                    <td>{{ student.semester }}</td>
+                                    <td>
+                                        <form method="post">
+                                            {% csrf_token %}
+
+                                            <input
+                                                type="hidden"
+                                                name="action"
+                                                value="approve"
+                                            >
+
+                                            <input
+                                                type="hidden"
+                                                name="profile_id"
+                                                value="{{ student.pk }}"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                class="approve-button"
+                                            >
+                                                Approve
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty">
+                    There are no students waiting for approval.
+                </p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <h2>Registered Students</h2>
+
+            {% if students %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>Approval Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for student in students %}
+                                <tr>
+                                    <td>{{ student.user.username }}</td>
+                                    <td>{{ student.department }}</td>
+                                    <td>{{ student.semester }}</td>
+                                    <td>
+                                        {% if student.is_approved %}
+                                            Approved
+                                        {% else %}
+                                            Pending
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty">
+                    No student accounts are registered yet.
+                </p>
+            {% endif %}
+        </section>
+
+        <a class="back-link" href="{% url 'dashboard' %}">
+            Back to Dashboard
+        </a>
+
+    </main>
+</body>
+</html>

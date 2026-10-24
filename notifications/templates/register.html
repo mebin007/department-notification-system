@@ -54,13 +54,10 @@
             max-width: 500px;
             padding: 40px;
             border-radius: 25px;
-
             background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-
             border: 1px solid rgba(255, 255, 255, 0.7);
-
             box-shadow:
                 0 20px 50px rgba(91, 16, 37, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -91,12 +88,9 @@
             width: 100%;
             padding: 13px 14px;
             margin-bottom: 18px;
-
             border: 1px solid rgba(91, 16, 37, 0.2);
             border-radius: 12px;
-
             background: rgba(255, 255, 255, 0.7);
-
             font-size: 15px;
             outline: none;
         }
@@ -111,21 +105,22 @@
             width: 100%;
             padding: 14px;
             margin-top: 5px;
-
             border: none;
             border-radius: 12px;
-
             background: #6b1028;
             color: white;
-
             font-size: 16px;
             font-weight: 700;
-
             cursor: pointer;
         }
 
         button:hover {
             background: #4f0b1d;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
         }
 
         .login-link {
@@ -169,11 +164,10 @@
 
     <nav>
         <div class="logo">DNMS</div>
-        <a href="/login/">Login</a>
+        <a href="{% url 'login' %}">Login</a>
     </nav>
 
     <div class="container">
-
         <div class="card">
 
             <h1>Create Account</h1>
@@ -193,68 +187,68 @@
             {% endif %}
 
             <form method="POST">
-
                 {% csrf_token %}
 
-                <label>Username</label>
+                <label for="username">Username</label>
                 <input
                     type="text"
+                    id="username"
                     name="username"
                     placeholder="Enter username"
+                    autocomplete="username"
                     required
                 >
 
-                <label>Password</label>
+                <label for="password">Password</label>
                 <input
                     type="password"
+                    id="password"
                     name="password"
                     placeholder="Enter password"
+                    autocomplete="new-password"
                     required
                 >
 
-                <label>Department</label>
-                <select name="department" required>
+                <label for="department">Department</label>
+
+                <select id="department" name="department" required>
                     <option value="">Select Department</option>
-                    <option value="Computer Applications">
-                        Computer Applications
-                    </option>
-                    <option value="Computer Science">
-                        Computer Science
-                    </option>
-                    <option value="Commerce">
-                        Commerce
-                    </option>
-                    <option value="Electronics">
-                        Electronics
-                    </option>
+
+                    {% for department in departments %}
+                        <option value="{{ department }}">
+                            {{ department }}
+                        </option>
+                    {% empty %}
+                        <option value="" disabled>
+                            No active departments available
+                        </option>
+                    {% endfor %}
                 </select>
 
-                <label>Semester</label>
-                <select name="semester" required>
+                <label for="semester">Semester</label>
+
+                <select id="semester" name="semester" required>
                     <option value="">Select Semester</option>
-                    <option value="1">Semester 1</option>
-                    <option value="2">Semester 2</option>
-                    <option value="3">Semester 3</option>
-                    <option value="4">Semester 4</option>
-                    <option value="5">Semester 5</option>
-                    <option value="6">Semester 6</option>
-                    <option value="7">Semester 7</option>
-                    <option value="8">Semester 8</option>
+
+                    {% for semester in semesters %}
+                        <option value="{{ semester }}">
+                            Semester {{ semester }}
+                        </option>
+                    {% endfor %}
                 </select>
 
-                <button type="submit">
+                <button type="submit"
+                    {% if not departments %}disabled{% endif %}>
                     Create Account
                 </button>
-
             </form>
 
             <div class="login-link">
                 Already have an account?
-                <a href="/login/">Login</a>
+                <a href="{% url 'login' %}">Login</a>
             </div>
 
         </div>
-
     </div>
 
 </body>

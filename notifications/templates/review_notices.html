@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Notices | DNMS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 16px;
+            font-family: Arial, sans-serif;
+            background: #f5f1eb;
+            color: #30252a;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .header {
+            background: #5a1b2d;
+            color: white;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #f0dfe4;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .notice {
+            padding: 20px 0;
+            border-bottom: 1px solid #eee5e5;
+        }
+
+        .notice:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #5a1b2d;
+        }
+
+        h3 {
+            margin: 0 0 12px;
+            color: #42121f;
+        }
+
+        .detail {
+            margin: 8px 0;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+            border-radius: 20px;
+            background: #f4e8d7;
+            color: #5a1b2d;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        button, .back-link {
+            display: inline-block;
+            padding: 11px 17px;
+            border: none;
+            border-radius: 7px;
+            background: #246b4a;
+            color: white;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .reject-button {
+            background: #a83242;
+        }
+
+        button:hover {
+            opacity: 0.88;
+        }
+
+        .back-link {
+            background: #5a1b2d;
+        }
+
+        .empty {
+            padding: 20px 0;
+            color: #74676b;
+        }
+
+        .message {
+            padding: 13px;
+            margin-bottom: 12px;
+            border-radius: 7px;
+            background: #f4e8d7;
+            border: 1px solid #e0cfb5;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px 10px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+
+        <header class="header">
+            <h1>Review College Notices</h1>
+            <p>Review faculty requests before they are published.</p>
+        </header>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="card">
+            <h2>Pending Notices</h2>
+
+            {% if notices %}
+                {% for notice in notices %}
+                    <article class="notice">
+                        <span class="badge">Awaiting Approval</span>
+
+                        <h3>{{ notice.title }}</h3>
+
+                        <p class="detail">
+                            <strong>Submitted by:</strong>
+                            {{ notice.author.username }}
+                        </p>
+
+                        <p class="detail">
+                            <strong>Audience:</strong>
+                            {% if notice.audience == 'STAFF' %}
+                                Faculty
+                            {% else %}
+                                Students
+                            {% endif %}
+                        </p>
+
+                        <p class="detail">
+                            <strong>Department:</strong>
+                            {% if notice.is_college_wide %}
+                                College-wide
+                            {% else %}
+                                {{ notice.department }}
+                            {% endif %}
+                        </p>
+
+                        {% if notice.semester %}
+                            <p class="detail">
+                                <strong>Semester:</strong>
+                                {{ notice.semester }}
+                            </p>
+                        {% endif %}
+
+                        <p class="detail">
+                            <strong>Publication time:</strong>
+                            {{ notice.publish_at|date:"d M Y, h:i A" }}
+                        </p>
+
+                        <p class="detail">
+                            <strong>Description:</strong>
+                        </p>
+
+                        <p class="detail">
+                            {{ notice.description|linebreaksbr }}
+                        </p>
+
+                        {% if notice.is_important %}
+                            <p class="detail">
+                                <strong>Important notice</strong>
+                            </p>
+                        {% endif %}
+
+                        {% if notice.related_links %}
+                            <p class="detail">
+                                <strong>Related links:</strong>
+                            </p>
+
+                            {% for link in notice.related_links %}
+                                <p class="detail">
+                                    <a href="{{ link.url }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        {{ link.label|default:link.url }}
+                                    </a>
+                                </p>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if notice.attachments.all %}
+                            {% for attachment in notice.attachments.all %}
+                                <p class="detail">
+                                    PDF attachment:
+                                    {{ attachment.file.name }}
+                                </p>
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="actions">
+                            <form method="post">
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="notice_id"
+                                    value="{{ notice.pk }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="approve"
+                                >
+
+                                <button type="submit">
+                                    Approve Notice
+                                </button>
+                            </form>
+
+                            <form method="post"
+                                  onsubmit="return confirm('Are you sure you want to reject and delete this notice?');">
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="notice_id"
+                                    value="{{ notice.pk }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="reject"
+                                >
+
+                                <button type="submit"
+                                        class="reject-button">
+                                    Reject Notice
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p class="empty">
+                    There are no pending notices to review.
+                </p>
+            {% endif %}
+        </section>
+
+        <a class="back-link" href="{% url 'dashboard' %}">
+            Back to Dashboard
+        </a>
+
+    </main>
+</body>
+</html>
