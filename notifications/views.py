@@ -658,18 +658,88 @@ def review_college_notices(request):
     )
 
 
-def send_push_for_notification(notification):
-    if (
-        not os.environ.get('VAPID_PRIVATE_KEY')
-        or not os.environ.get('VAPID_PUBLIC_KEY')
-    ):
-        print("[PUSH DEBUG] VAPID keys are missing.")
-        return False
+def get_vapid_key():
+    try:
+        from py_vapid import Vapid02 as Vapid
+    except ImportError:
+        try:
+            from py_vapid import Vapid
+        except ImportError:
+            return None
 
+    key_val = os.environ.get('VAPID_PRIVATE_KEY', '').strip()
+    if key_val:
+        if os.path.isfile(key_val):
+            try:
+                return Vapid.from_file(key_val)
+            except Exception:
+                pass
+        if '-----BEGIN' in key_val:
+            try:
+                return Vapid.from_pem(key_val.encode('utf8'))
+            except Exception:
+                pass
+        try:
+            return Vapid.from_string(key_val)
+        except Exception:
+            pass
+
+    from django.conf import settings
+    base_dir = getattr(settings, 'BASE_DIR', None)
+    if base_dir:
+        local_pem = base_dir / 'vapid_private.pem'
+        if local_pem.exists():
+            try:
+                return Vapid.from_file(str(local_pem))
+            except Exception:
+                pass
+
+    if os.path.isfile('vapid_private.pem'):
+        try:
+            return Vapid.from_file('vapid_private.pem')
+        except Exception:
+            pass
+
+    return None
+
+
+def get_vapid_public_key():
+    env_pub = os.environ.get('VAPID_PUBLIC_KEY', '').strip()
+    if env_pub:
+        return env_pub
+
+    v = get_vapid_key()
+    if v and hasattr(v, 'public_key'):
+        try:
+            import base64
+            from cryptography.hazmat.primitives import serialization
+            pub_bytes = v.public_key.public_bytes(
+                encoding=serialization.Encoding.X962,
+                format=serialization.PublicFormat.UncompressedPoint
+            )
+            return base64.urlsafe_b64encode(pub_bytes).rstrip(b'=').decode('utf8')
+        except Exception:
+            pass
+
+    return 'BALQnRqTXveM7AFxjglRt46wUlw9ukqXFFvr8SPWIdsE5VjoDSRUTvVSkShoaoKbmucl5i5_k7AdviJTBeWBOjY'
+
+
+def push_public_key(request):
+    return JsonResponse({
+        'publicKey': get_vapid_public_key(),
+    })
+
+
+def send_push_for_notification(notification):
     try:
         from pywebpush import webpush
     except ImportError:
         print("[PUSH DEBUG] pywebpush is not installed.")
+        return False
+
+    vapid = get_vapid_key()
+    if not vapid:
+        print("[PUSH DEBUG] VAPID private key could not be loaded.")
         return False
 
     target_role = (
@@ -697,19 +767,13 @@ def send_push_for_notification(notification):
     payload = json.dumps({
         'title': notification.title,
         'body': notification.description[:180],
-        'url': '/notifications/',
+        'url': f'/notifications/{notification.id}/',
     })
 
     subscription_count = subscriptions.count()
-    print(
-        f"[PUSH DEBUG] Notification audience: {notification.audience}"
-    )
-    print(
-        f"[PUSH DEBUG] Target role: {target_role}"
-    )
-    print(
-        f"[PUSH DEBUG] Matching subscriptions: {subscription_count}"
-    )
+    print(f"[PUSH DEBUG] Notification: '{notification.title}' | Audience: {notification.audience}")
+    print(f"[PUSH DEBUG] Target role: {target_role} | Department: {notification.department or 'College-wide'}")
+    print(f"[PUSH DEBUG] Matching subscriptions: {subscription_count}")
 
     if subscription_count == 0:
         print("[PUSH DEBUG] No matching subscriptions found.")
@@ -730,7 +794,7 @@ def send_push_for_notification(notification):
                     },
                 },
                 data=payload,
-                vapid_private_key=os.environ['VAPID_PRIVATE_KEY'],
+                vapid_private_key=vapid,
                 vapid_claims={
                     'sub': os.environ.get(
                         'VAPID_SUBJECT',
@@ -739,27 +803,20 @@ def send_push_for_notification(notification):
                 },
             )
             successful_sends += 1
-            print(
-                "[PUSH DEBUG] Push accepted by the push service."
-            )
+            print(f"[PUSH DEBUG] Push delivered to {subscription.user.username} ({subscription.endpoint[:40]}...)")
 
         except Exception as exc:
-            print(f"[PUSH DEBUG] Delivery failed: {exc}")
+            print(f"[PUSH DEBUG] Delivery failed for {subscription.user.username}: {exc}")
             response = getattr(exc, 'response', None)
 
             if response is not None and response.status_code in (404, 410):
                 subscription.delete()
-                print(
-                    "[PUSH DEBUG] Removed an expired subscription."
-                )
+                print(f"[PUSH DEBUG] Removed expired subscription for {subscription.user.username}.")
 
     notification.push_sent = successful_sends > 0
     notification.save(update_fields=['push_sent'])
 
-    print(
-        f"[PUSH DEBUG] Successful sends: {successful_sends}"
-    )
-
+    print(f"[PUSH DEBUG] Successful sends: {successful_sends} / {subscription_count}")
     return successful_sends > 0
 
 

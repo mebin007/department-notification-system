@@ -16,8 +16,6 @@ self.addEventListener('push', function (event) {
 
     const options = {
         body: data.body || data.message || 'A new college notification is available.',
-        icon: '/static/images/notification-icon.png',
-        badge: '/static/images/notification-icon.png',
         data: {
             url: data.url || '/notifications/'
         }

@@ -79,9 +79,7 @@ urlpatterns = [
     ),
     path(
         'push/public-key/',
-        lambda request: JsonResponse({
-            'publicKey': os.environ.get('VAPID_PUBLIC_KEY', ''),
-        }),
+        views.push_public_key,
         name='push_public_key',
     ),
 
