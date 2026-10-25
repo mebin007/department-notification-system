@@ -147,6 +147,13 @@
     </nav>
 
     <main>
+        {% if messages %}
+            {% for message in messages %}
+                <div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
         <a class="back" href="{% url 'notifications' %}">
             ← Back to notifications
         </a>
@@ -186,6 +193,9 @@
             {% if notification.is_college_wide %}
                 <span class="tag">COLLEGE-WIDE</span>
             {% endif %}
+            <span class="tag" style="background: #e2eafc; color: #2b4c7e;">
+                AUDIENCE: {{ notification.get_audience_display|upper }}
+            </span>
 
             <div class="description">{{ notification.description }}</div>
 
@@ -199,9 +209,15 @@
                         </span>
                         <br>
 
-                        <a href="{% url 'download_attachment' attachment.id %}">
-                            Download PDF
-                        </a>
+                        <div style="display: flex; gap: 14px; margin-top: 6px; font-weight: bold;">
+                            <a href="{% url 'download_attachment' attachment.id %}?view=1" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">
+                                👁️ View PDF (Inline)
+                            </a>
+                            <span style="color: #aaa;">|</span>
+                            <a href="{% url 'download_attachment' attachment.id %}" style="text-decoration: underline;">
+                                ⬇️ Download File
+                            </a>
+                        </div>
                     </div>
                 {% endfor %}
             {% endif %}

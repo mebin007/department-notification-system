@@ -623,20 +623,63 @@
         <section class="welcome">
 
             <div class="welcome-badge">
-                DNMS Dashboard
+                {% if role == 'Admin' %}
+                    👑 Principal / Admin Authority
+                {% elif role == 'Faculty' %}
+                    👨‍🏫 Faculty Portal ({{ department|default:"Department Teacher" }})
+                {% else %}
+                    🎓 Student Portal ({{ department|default:"Student" }}{% if semester %} • Sem {{ semester }}{% endif %})
+                {% endif %}
             </div>
 
             <h1>
-                Welcome to <span>DNMS</span>
+                Welcome to <span>DNMS</span>, {{ request.user.username }}
             </h1>
 
             <p>
-                Manage and access department notifications
-                from one centralized platform.
+                Centralized Department-Based Notification Management System with real-time push alerts.
             </p>
 
         </section>
 
+        <!-- =========================
+             ACTION ALERT BANNERS
+        ========================= -->
+        {% if role == 'Admin' and pending_notices_count > 0 %}
+            <div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 18px 24px; border-radius: 14px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 18px rgba(133, 100, 4, 0.12);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 28px;">🔔</span>
+                    <div>
+                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 2px;">Notice Approval Interface Required</div>
+                        <div style="font-size: 14px;">You have <strong>{{ pending_notices_count }}</strong> college-wide notice request(s) submitted by faculty awaiting your approval.</div>
+                    </div>
+                </div>
+                <a href="{% url 'review_college_notices' %}" style="background: #5a1726; color: #f5efe6; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(90, 23, 38, 0.2);">
+                    Review &amp; Approve Notices →
+                </a>
+            </div>
+        {% endif %}
+
+        {% if pending_students_count > 0 %}
+            <div style="background: #e7f3fe; border: 1px solid #b8daff; color: #004085; padding: 18px 24px; border-radius: 14px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 18px rgba(0, 64, 133, 0.1);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 28px;">🎓</span>
+                    <div>
+                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 2px;">Student Registrations Awaiting Approval</div>
+                        <div style="font-size: 14px;">There are <strong>{{ pending_students_count }}</strong> student registration(s) waiting for verification and approval.</div>
+                    </div>
+                </div>
+                <a href="{% url 'student_management' %}" style="background: #004085; color: #fff; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 14px;">
+                    Approve Students →
+                </a>
+            </div>
+        {% endif %}
+
+        {% if role == 'Faculty' and pending_notices_count > 0 %}
+            <div style="background: #fdf3e7; border: 1px solid #f9dfc7; color: #8a5314; padding: 14px 20px; border-radius: 12px; margin-bottom: 25px;">
+                ℹ️ You have <strong>{{ pending_notices_count }}</strong> college-wide notice request(s) submitted to the Principal awaiting approval.
+            </div>
+        {% endif %}
 
         <!-- =========================
              STATISTICS
@@ -644,183 +687,254 @@
 
         <section class="stats-grid">
 
-
             <div class="stat-card">
-
-                <div class="stat-icon">
-                    🔔
-                </div>
-
-                <div class="stat-number">
-                    {{ total_notifications }}
-                </div>
-
-                <div class="stat-title">
-                    Available Notifications
-                </div>
-
+                <div class="stat-icon">🔔</div>
+                <div class="stat-number">{{ total_notifications }}</div>
+                <div class="stat-title">Available Notifications</div>
             </div>
 
-
             <div class="stat-card">
-
-                <div class="stat-icon">
-                    ⭐
-                </div>
-
-                <div class="stat-number">
-                    {{ important_notifications }}
-                </div>
-
-                <div class="stat-title">
-                    Important Notifications
-                </div>
-
+                <div class="stat-icon">⭐</div>
+                <div class="stat-number">{{ important_notifications }}</div>
+                <div class="stat-title">Important Notices</div>
             </div>
 
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    🏢
+            {% if role == 'Admin' %}
+                <div class="stat-card" style="border: 2px solid {% if pending_notices_count > 0 %}#5a1726{% else %}transparent{% endif %};">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-number" style="color: {% if pending_notices_count > 0 %}#5a1726{% else %}inherit{% endif %};">{{ pending_notices_count }}</div>
+                    <div class="stat-title">Pending Notice Approvals</div>
                 </div>
 
-                <div class="stat-number">
-                    {{ department|default:"Not Set" }}
+                <div class="stat-card" style="border: 2px solid {% if pending_students_count > 0 %}#004085{% else %}transparent{% endif %};">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-number" style="color: {% if pending_students_count > 0 %}#004085{% else %}inherit{% endif %};">{{ pending_students_count }}</div>
+                    <div class="stat-title">Pending Student Approvals</div>
+                </div>
+            {% elif role == 'Faculty' %}
+                <div class="stat-card">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-number" style="font-size: 20px; padding-top: 6px;">{{ department|default:"Not Set" }}</div>
+                    <div class="stat-title">Your Department</div>
                 </div>
 
-                <div class="stat-title">
-                    Your Department
+                <div class="stat-card" style="border: 2px solid {% if pending_students_count > 0 %}#004085{% else %}transparent{% endif %};">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-number" style="color: {% if pending_students_count > 0 %}#004085{% else %}inherit{% endif %};">{{ pending_students_count }}</div>
+                    <div class="stat-title">Pending Student Approvals</div>
+                </div>
+            {% else %}
+                <div class="stat-card">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-number" style="font-size: 20px; padding-top: 6px;">{{ department|default:"Not Set" }}</div>
+                    <div class="stat-title">Your Department</div>
                 </div>
 
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    🎓
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-number">
+                        {% if semester %}Semester {{ semester }}{% else %}Not Set{% endif %}
+                    </div>
+                    <div class="stat-title">Your Semester</div>
                 </div>
-
-                <div class="stat-number">
-                    {% if semester %}
-                        Semester {{ semester }}
-                    {% else %}
-                        Not Set
-                    {% endif %}
-                </div>
-
-                <div class="stat-title">
-                    Your Semester
-                </div>
-
-            </div>
-
+            {% endif %}
 
         </section>
 
 
         <!-- =========================
-             QUICK ACTIONS
+             MANAGEMENT & QUICK ACTIONS
         ========================= -->
+
+        <h2 style="color: #5a1726; font-size: 22px; margin: 35px 0 18px 0; font-weight: bold;">
+            🚀 Action Center &amp; Management
+        </h2>
 
         <section class="dashboard-grid">
 
+            {% if role == 'Admin' or role == 'Faculty' %}
+                <div class="dashboard-card" style="border-top: 4px solid #5a1726;">
+                    <div class="card-icon">➕</div>
+                    <h2>Create Notification</h2>
+                    <p>
+                        Post announcements to All Users, Students Only, or Staff Only with PDF attachments.
+                    </p>
+                    <a href="{% url 'create_notification' %}" class="card-link" style="font-weight: bold; color: #5a1726;">
+                        Compose Notice →
+                    </a>
+                </div>
+            {% endif %}
 
-            <div class="dashboard-card">
-
-                <div class="card-icon">
-                    🔔
+            {% if role == 'Admin' %}
+                <div class="dashboard-card" style="border-top: 4px solid #c97a2b;">
+                    <div class="card-icon">📋</div>
+                    <h2>
+                        Review College Notices
+                        {% if pending_notices_count > 0 %}
+                            <span style="font-size: 12px; background: #c97a2b; color: #fff; padding: 2px 8px; border-radius: 10px; margin-left: 6px;">{{ pending_notices_count }} pending</span>
+                        {% endif %}
+                    </h2>
+                    <p>
+                        Approval interface for college-wide announcements submitted by department faculty.
+                    </p>
+                    <a href="{% url 'review_college_notices' %}" class="card-link" style="font-weight: bold; color: #c97a2b;">
+                        Open Approval Interface →
+                    </a>
                 </div>
 
-                <h2>
-                    Notifications
-                </h2>
+                <div class="dashboard-card" style="border-top: 4px solid #1a6d48;">
+                    <div class="card-icon">👨‍🏫</div>
+                    <h2>Faculty &amp; Staff Management</h2>
+                    <p>
+                        Add, configure and oversee faculty accounts for each college department.
+                    </p>
+                    <a href="{% url 'staff_management' %}" class="card-link" style="font-weight: bold; color: #1a6d48;">
+                        Manage Faculty Accounts →
+                    </a>
+                </div>
+            {% endif %}
 
+            {% if role == 'Admin' or role == 'Faculty' %}
+                <div class="dashboard-card" style="border-top: 4px solid #004085;">
+                    <div class="card-icon">🎓</div>
+                    <h2>
+                        Student Approvals &amp; Accounts
+                        {% if pending_students_count > 0 %}
+                            <span style="font-size: 12px; background: #004085; color: #fff; padding: 2px 8px; border-radius: 10px; margin-left: 6px;">{{ pending_students_count }} pending</span>
+                        {% endif %}
+                    </h2>
+                    <p>
+                        Verify and approve student registrations for your department and create student accounts.
+                    </p>
+                    <a href="{% url 'student_management' %}" class="card-link" style="font-weight: bold; color: #004085;">
+                        Manage Student Approvals →
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="dashboard-card">
+                <div class="card-icon">🔔</div>
+                <h2>Notifications Feed</h2>
                 <p>
-                    View the latest announcements,
-                    examination schedules and academic updates.
+                    Browse published announcements, examination notices, schedules, and PDF documents.
                 </p>
-
-                <a
-                    href="/notifications/"
-                    class="card-link"
-                >
+                <a href="{% url 'notifications' %}" class="card-link">
                     View Notifications →
                 </a>
-
             </div>
 
-
             <div class="dashboard-card">
-
-                <div class="card-icon">
-                    🏢
-                </div>
-
-                <h2>
-                    Departments
-                </h2>
-
+                <div class="card-icon">🏢</div>
+                <h2>Departments Directory</h2>
                 <p>
-                    Explore the departments available
-                    within the notification system.
+                    Explore all academic departments and department-specific information.
                 </p>
-
-                <a
-                    href="/departments/"
-                    class="card-link"
-                >
+                <a href="{% url 'departments' %}" class="card-link">
                     View Departments →
                 </a>
-
             </div>
 
-
-            <div class="dashboard-card">
-
-                <div class="card-icon">
-                    ⚙️
+            {% if role == 'Admin' %}
+                <div class="dashboard-card">
+                    <div class="card-icon">⚙️</div>
+                    <h2>Django Administration</h2>
+                    <p>
+                        Direct access to database tables, push subscriptions, models, and low-level records.
+                    </p>
+                    <a href="/admin/" class="card-link">
+                        Open Admin Panel →
+                    </a>
                 </div>
-
-                <h2>
-                    Administration
-                </h2>
-
-                <p>
-                    Manage notifications and system content
-                    through the administration panel.
-                </p>
-
-                <a
-                    href="/admin/"
-                    class="card-link"
-                >
-                    Open Admin →
-                </a>
-
-            </div>
-
+            {% endif %}
 
         </section>
 
 
         <!-- =========================
-             INFORMATION
+             WEB PUSH NOTIFICATION CONTROLS
         ========================= -->
 
-        <section class="info-panel">
+        <section class="info-panel" style="margin-top: 35px; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 32px; box-shadow: 0 10px 30px rgba(70, 35, 28, 0.06);">
+
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h2 style="margin: 0 0 8px 0; color: #5a1726; font-size: 22px; display: flex; align-items: center; gap: 10px;">
+                        <span>🔔</span> Web Push Notification Center
+                    </h2>
+                    <p style="margin: 0; color: #666; font-size: 14px; max-width: 620px; line-height: 1.6;">
+                        Receive real-time push alerts on your desktop or mobile device the exact moment an announcement is published by the Principal or Faculty.
+                    </p>
+
+                    <div style="margin-top: 14px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-weight: bold; color: #444;">Server Connection Status:</span>
+                        <span id="push-status-pill" style="padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; background: {% if user_has_push_subscription %}#d4edda; color: #155724;{% else %}#f8d7da; color: #721c24;{% endif %}">
+                            {% if user_has_push_subscription %}Subscribed on Device ✅{% else %}Not Subscribed 🔕{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button
+                        id="enable-push-notifications"
+                        type="button"
+                        style="
+                            background: #5a1726;
+                            color: #f5efe6;
+                            border: none;
+                            border-radius: 10px;
+                            padding: 13px 22px;
+                            font-weight: bold;
+                            font-size: 14px;
+                            cursor: pointer;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 8px;
+                            box-shadow: 0 4px 14px rgba(90, 23, 38, 0.25);
+                        "
+                    >
+                        🔔 Enable Push Notifications
+                    </button>
+
+                    <button
+                        id="test-push-notification"
+                        type="button"
+                        style="
+                            background: #1a6d48;
+                            color: #ffffff;
+                            border: none;
+                            border-radius: 10px;
+                            padding: 13px 22px;
+                            font-weight: bold;
+                            font-size: 14px;
+                            cursor: pointer;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 8px;
+                            box-shadow: 0 4px 14px rgba(26, 109, 72, 0.25);
+                        "
+                    >
+                        🚀 Send Test Push Alert
+                    </button>
+                </div>
+            </div>
+
+            <p id="push-status" role="status" style="margin-top: 18px; font-size: 14px; font-weight: bold; color: #5a1726; min-height: 20px;"></p>
+
+        </section>
+
+
+        <!-- =========================
+             INFORMATION PANEL
+        ========================= -->
+
+        <section class="info-panel" style="margin-top: 30px;">
 
             <h2>
-                Department Notification Management System
+                Department Notification Management System (DNMS)
             </h2>
 
             <p>
-                DNMS provides a centralized platform for
-                departments to manage important academic
-                notifications and for students to access
-                relevant information according to their
-                department and semester.
+                DNMS operates a three-tier hierarchy: Principal/Admin handles institution-wide governance and approvals; Faculty manage departmental announcements and student registrations; Students receive personalized, real-time academic updates according to their department and semester.
             </p>
 
         </section>
@@ -840,38 +954,18 @@
         </p>
 
     </footer>
-    <div style="text-align: center; padding: 20px;">
-    <button
-        id="enable-push-notifications"
-        type="button"
-        style="
-            background: #5a1726;
-            color: #f5efe6;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 20px;
-            font-weight: bold;
-            cursor: pointer;
-        "
-    >
-        Enable Push Notifications
-    </button>
 
-    <p id="push-status" role="status" style="margin-top: 10px;"></p>
-</div>
-<form id="push-csrf-form" hidden>
-    {% csrf_token %}
-</form>
-
+    <form id="push-csrf-form" hidden>
+        {% csrf_token %}
+    </form>
 
 </body>
+
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async function () {
             try {
-                const registration =
-                    await navigator.serviceWorker.register('/service-worker.js');
-
+                const registration = await navigator.serviceWorker.register('/service-worker.js');
                 console.log('DNMS service worker registered:', registration.scope);
             } catch (error) {
                 console.error('DNMS service worker registration failed:', error);
@@ -882,10 +976,25 @@
 
 <script>
     const pushButton = document.getElementById('enable-push-notifications');
+    const testPushButton = document.getElementById('test-push-notification');
     const pushStatus = document.getElementById('push-status');
+    const pushStatusPill = document.getElementById('push-status-pill');
 
-    function setPushStatus(message) {
+    function setPushStatus(message, isError = false) {
         pushStatus.textContent = message;
+        pushStatus.style.color = isError ? '#a71d2a' : '#1a6d48';
+    }
+
+    function updatePill(active) {
+        if (active) {
+            pushStatusPill.textContent = 'Subscribed on Device ✅';
+            pushStatusPill.style.background = '#d4edda';
+            pushStatusPill.style.color = '#155724';
+        } else {
+            pushStatusPill.textContent = 'Not Subscribed 🔕';
+            pushStatusPill.style.background = '#f8d7da';
+            pushStatusPill.style.color = '#721c24';
+        }
     }
 
     function urlBase64ToUint8Array(base64String) {
@@ -906,7 +1015,7 @@
 
     pushButton.addEventListener('click', async function () {
         pushButton.disabled = true;
-        setPushStatus('Enabling notifications...');
+        setPushStatus('Requesting browser permission and generating encryption keys...');
 
         try {
             if (
@@ -914,54 +1023,38 @@
                 !('serviceWorker' in navigator) ||
                 !('PushManager' in window)
             ) {
-                throw new Error(
-                    'Push notifications are not supported by this browser.'
-                );
+                throw new Error('Push notifications are not supported by this browser.');
             }
 
             const permission = await Notification.requestPermission();
 
             if (permission !== 'granted') {
-                throw new Error(
-                    'Notification permission was not granted. Check your browser settings.'
-                );
+                throw new Error('Notification permission was denied. Please allow notifications in your browser settings.');
             }
 
             const keyResponse = await fetch('/push/public-key/');
-
             if (!keyResponse.ok) {
-                throw new Error('Could not retrieve the push notification key.');
+                throw new Error('Could not retrieve VAPID public key from server.');
             }
 
             const keyData = await keyResponse.json();
-
             if (!keyData.publicKey) {
-                throw new Error(
-                    'The server public key is missing. Check your server configuration.'
-                );
+                throw new Error('Server VAPID public key is empty. Please check server configuration.');
             }
 
             const registration = await navigator.serviceWorker.ready;
-
-            let subscription =
-                await registration.pushManager.getSubscription();
+            let subscription = await registration.pushManager.getSubscription();
 
             if (!subscription) {
                 subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
-                    applicationServerKey:
-                        urlBase64ToUint8Array(keyData.publicKey)
+                    applicationServerKey: urlBase64ToUint8Array(keyData.publicKey)
                 });
             }
 
-            const csrfToken = document.querySelector(
-                '#push-csrf-form [name="csrfmiddlewaretoken"]'
-            )?.value;
-
+            const csrfToken = document.querySelector('#push-csrf-form [name="csrfmiddlewaretoken"]')?.value;
             if (!csrfToken) {
-                throw new Error(
-                    'Django security token not found. Refresh the page and try again.'
-                );
+                throw new Error('CSRF security token missing. Refresh page and try again.');
             }
 
             const saveResponse = await fetch('/push/subscribe/', {
@@ -975,22 +1068,47 @@
             });
 
             const result = await saveResponse.json();
-
             if (!saveResponse.ok || !result.ok) {
-                throw new Error(
-                    result.error || 'The server could not save your subscription.'
-                );
+                throw new Error(result.error || 'The server could not record your push subscription.');
             }
 
-            setPushStatus('Notifications enabled successfully!');
+            setPushStatus('✅ Push notifications successfully activated for your account!');
+            updatePill(true);
         } catch (error) {
             console.error('DNMS push notification error:', error);
-            setPushStatus(error.message || 'Could not enable notifications.');
+            setPushStatus(error.message || 'Could not enable push notifications.', true);
         } finally {
             pushButton.disabled = false;
         }
     });
-</script>
 
+    testPushButton.addEventListener('click', async function () {
+        testPushButton.disabled = true;
+        setPushStatus('Dispatching live test alert through WebPush server...');
+
+        try {
+            const csrfToken = document.querySelector('#push-csrf-form [name="csrfmiddlewaretoken"]')?.value;
+            const res = await fetch('/push/test/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+                throw new Error(data.error || 'Test notification could not be delivered.');
+            }
+
+            setPushStatus('🚀 Test alert sent! Check your system notification tray / screen.');
+            updatePill(true);
+        } catch (err) {
+            setPushStatus('❌ Test alert failed: ' + err.message, true);
+        } finally {
+            testPushButton.disabled = false;
+        }
+    });
+</script>
 
 </html>

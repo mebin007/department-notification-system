@@ -48,8 +48,9 @@ class Notification(models.Model):
         ('PENDING', 'Awaiting principal approval'),
     ]
     AUDIENCE_CHOICES = [
-        ('STAFF', 'Staff'),
+        ('ALL', 'All Users (Students & Staff)'),
         ('STUDENTS', 'Students'),
+        ('STAFF', 'Staff / Faculty'),
     ]
 
     title = models.CharField(max_length=200)
@@ -62,7 +63,7 @@ class Notification(models.Model):
     is_college_wide = models.BooleanField(default=False)
     push_sent = models.BooleanField(default=False)
     audience = models.CharField(
-        max_length=10, choices=AUDIENCE_CHOICES, default='STUDENTS'
+        max_length=10, choices=AUDIENCE_CHOICES, default='ALL'
     )
     approval_status = models.CharField(
         max_length=12, choices=APPROVAL_CHOICES, default='PUBLISHED'

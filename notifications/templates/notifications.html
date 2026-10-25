@@ -365,7 +365,25 @@
         </p>
     </section>
 
+    {% if role == 'Admin' and pending_notices_count > 0 %}
+        <div style="max-width: 900px; margin: 0 auto 20px; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 14px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <strong>🔔 Approval Notice:</strong> You have <strong>{{ pending_notices_count }}</strong> college-wide notice request(s) awaiting your review.
+            </div>
+            <a href="{% url 'review_college_notices' %}" style="background: #5a1726; color: #fff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;">
+                Review Pending Notices →
+            </a>
+        </div>
+    {% endif %}
+
     <section class="notification-section">
+        {% if role == 'Admin' or role == 'Faculty' %}
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 22px;">
+                <a href="{% url 'create_notification' %}" style="background: var(--burgundy); color: var(--cream); text-decoration: none; padding: 12px 22px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(90, 23, 38, 0.15);">
+                    ➕ Create Notification
+                </a>
+            </div>
+        {% endif %}
         <form method="GET" class="search-box">
             <input
                 type="text"

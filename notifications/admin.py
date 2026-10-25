@@ -67,45 +67,20 @@ class NotificationAdminForm(forms.ModelForm):
         ]
         self.fields['department'].widget.choices = choices
 
-        # Enforce notification hierarchy on both Add and Change forms
-        if not self.instance.pk or self.instance.audience == 'STAFF':
-            self.fields['audience'].choices = [
-                ('STAFF', 'Staff'),
-            ]
-            self.initial['audience'] = 'STAFF'
-            self.fields['audience'].help_text = (
-                'Admin-created notifications are restricted to Staff / Faculty.'
-            )
-        else:
-            # If an existing record was created for Students (via faculty interface),
-            # Admin cannot change it to target another audience or bypass the hierarchy.
-            self.fields['audience'].choices = [
-                ('STUDENTS', 'Students'),
-            ]
-            self.fields['audience'].disabled = True
-            self.fields['audience'].help_text = (
-                'This notification targets Students and was created through '
-                'the faculty interface. Admin cannot change its audience.'
-            )
+        # Principal / Admin can target All Users, Students, or Staff
+        self.fields['audience'].choices = [
+            ('ALL', 'All Users (Students & Staff)'),
+            ('STUDENTS', 'Students Only'),
+            ('STAFF', 'Staff / Faculty Only'),
+        ]
+        self.fields['audience'].help_text = (
+            'Select target audience: All Users, Students Only, or Staff/Faculty Only.'
+        )
 
     def clean_audience(self):
         audience = self.cleaned_data.get('audience')
-
-        if not self.instance.pk:
-            if audience != 'STAFF':
-                raise forms.ValidationError(
-                    'Admin notifications can only target Staff.'
-                )
-            return 'STAFF'
-
-        if self.instance.audience == 'STAFF' and audience != 'STAFF':
-            raise forms.ValidationError(
-                'Staff notifications cannot be changed to target Students.'
-            )
-
-        if self.instance.audience == 'STUDENTS':
-            return 'STUDENTS'
-
+        if audience not in ('ALL', 'STUDENTS', 'STAFF'):
+            raise forms.ValidationError('Please choose a valid audience: All Users, Students, or Staff.')
         return audience
 
 
@@ -147,7 +122,7 @@ class NotificationAdmin(admin.ModelAdmin):
 
         super().save_model(request, obj, form, change)
 
-        # Trigger push notification if the notice is published immediately
+        # Trigger push notification if the notice is published
         if obj.approval_status == 'PUBLISHED' and not obj.push_sent:
             try:
                 from .views import send_push_for_notification

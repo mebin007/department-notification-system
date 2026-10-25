@@ -371,6 +371,16 @@
 
             <h2 class="section-title">Target audience</h2>
 
+            <div class="field">
+                <label for="audience">Audience Group *</label>
+                <select name="audience" id="audience" required>
+                    <option value="ALL" {% if request.POST.audience == 'ALL' or not request.POST.audience %}selected{% endif %}>All Users (Students & Staff)</option>
+                    <option value="STUDENTS" {% if request.POST.audience == 'STUDENTS' %}selected{% endif %}>Students Only</option>
+                    <option value="STAFF" {% if request.POST.audience == 'STAFF' %}selected{% endif %}>Staff / Faculty Only</option>
+                </select>
+                <span class="hint">Both Principal and Faculty can select the target audience. Push notifications are delivered to subscribed devices for the selected group.</span>
+            </div>
+
             <div class="field" id="departmentField">
                 <label for="department">Department *</label>
                 {% if role == 'Admin' %}

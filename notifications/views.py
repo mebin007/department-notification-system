@@ -221,7 +221,7 @@ def dashboard(request):
 
     if role == 'Student':
         visible = visible.filter(
-            audience='STUDENTS',
+            audience__in=['STUDENTS', 'ALL'],
         ).filter(
             Q(is_college_wide=True)
             | Q(
@@ -232,15 +232,34 @@ def dashboard(request):
 
     elif role == 'Faculty':
         visible = visible.filter(
-            Q(audience='STAFF', is_college_wide=True)
-            | Q(audience='STAFF', department=profile.department)
-            | Q(audience='STUDENTS', is_college_wide=True)
-            | Q(
-                audience='STUDENTS',
-                department=profile.department,
-                semester__in=[profile.semester, ''],
-            )
+            Q(is_college_wide=True)
+            | Q(department=profile.department)
         )
+
+    pending_notices_count = 0
+    pending_students_count = 0
+    if role == 'Admin':
+        pending_notices_count = Notification.objects.filter(
+            approval_status='PENDING'
+        ).count()
+        pending_students_count = Profile.objects.filter(
+            role='Student',
+            is_approved=False,
+        ).count()
+    elif role == 'Faculty':
+        pending_notices_count = Notification.objects.filter(
+            author=request.user,
+            approval_status='PENDING',
+        ).count()
+        pending_students_count = Profile.objects.filter(
+            role='Student',
+            department=profile.department,
+            is_approved=False,
+        ).count()
+
+    user_has_push_subscription = PushSubscription.objects.filter(
+        user=request.user
+    ).exists()
 
     return render(
         request,
@@ -252,7 +271,10 @@ def dashboard(request):
             'important_notifications': visible.filter(
                 is_important=True
             ).count(),
+            'pending_notices_count': pending_notices_count,
+            'pending_students_count': pending_students_count,
             'role': role,
+            'user_has_push_subscription': user_has_push_subscription,
         },
     )
 
@@ -270,7 +292,7 @@ def notifications(request):
 
     if role == 'Student':
         qs = qs.filter(
-            audience='STUDENTS',
+            audience__in=['STUDENTS', 'ALL'],
         ).filter(
             Q(is_college_wide=True)
             | Q(
@@ -281,14 +303,8 @@ def notifications(request):
 
     elif role == 'Faculty':
         qs = qs.filter(
-            Q(audience='STAFF', is_college_wide=True)
-            | Q(audience='STAFF', department=profile.department)
-            | Q(audience='STUDENTS', is_college_wide=True)
-            | Q(
-                audience='STUDENTS',
-                department=profile.department,
-                semester__in=[profile.semester, ''],
-            )
+            Q(is_college_wide=True)
+            | Q(department=profile.department)
         )
 
     if search_query:
@@ -297,6 +313,12 @@ def notifications(request):
             | Q(description__icontains=search_query)
             | Q(department__icontains=search_query)
         )
+
+    pending_notices_count = 0
+    if role == 'Admin':
+        pending_notices_count = Notification.objects.filter(
+            approval_status='PENDING'
+        ).count()
 
     return render(
         request,
@@ -309,6 +331,7 @@ def notifications(request):
             ),
             'search_query': search_query,
             'role': role,
+            'pending_notices_count': pending_notices_count,
         },
     )
 
@@ -485,11 +508,20 @@ def create_notification(request):
         is_college_wide = request.POST.get('is_college_wide') == 'on'
 
         department = (
-            request.POST.get('department', '')
+            request.POST.get('department', '').strip()
             if role == 'Admin'
             else profile.department
         )
-        semester = request.POST.get('semester', '')
+        if is_college_wide:
+            department = ''
+
+        semester = request.POST.get('semester', '').strip()
+        if is_college_wide:
+            semester = ''
+
+        audience = request.POST.get('audience', 'ALL').strip().upper()
+        if audience not in ('ALL', 'STUDENTS', 'STAFF'):
+            audience = 'ALL'
 
         status = (
             'PENDING'
@@ -509,6 +541,8 @@ def create_notification(request):
                     else parsed
                 )
 
+        files = request.FILES.getlist('pdf_files')
+
         if (
             not title
             or not description
@@ -519,7 +553,21 @@ def create_notification(request):
         ):
             messages.error(
                 request,
-                'Please complete the title, description and audience.',
+                'Please complete the title, description, and target department.',
+            )
+        elif len(files) > 5:
+            messages.error(
+                request,
+                'Maximum 5 PDF files are allowed.',
+            )
+        elif any(
+            not file.name.lower().endswith('.pdf')
+            or file.size > 10 * 1024 * 1024
+            for file in files
+        ):
+            messages.error(
+                request,
+                'Only PDF files up to 10 MB each are allowed.',
             )
         else:
             links = []
@@ -537,13 +585,15 @@ def create_notification(request):
                         'url': url[:1000],
                     })
 
-            audience = 'STAFF' if role == 'Admin' else 'STUDENTS'
+            from django.conf import settings
+            if getattr(settings, 'MEDIA_ROOT', None):
+                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
 
             notification = Notification.objects.create(
                 title=title,
                 description=description,
-                department='' if is_college_wide else department,
-                semester='' if is_college_wide else semester,
+                department=department,
+                semester=semester,
                 audience=audience,
                 is_important=request.POST.get('is_important') == 'on',
                 is_pinned=request.POST.get('is_pinned') == 'on',
@@ -557,54 +607,30 @@ def create_notification(request):
                 contact_phone=request.POST.get('contact_phone', '').strip(),
             )
 
-            files = request.FILES.getlist('pdf_files')
+            for file in files:
+                NotificationAttachment.objects.create(
+                    notification=notification,
+                    file=file,
+                )
 
-            if len(files) > 5:
-                notification.delete()
-                messages.error(
+            if status == 'PENDING':
+                messages.success(
                     request,
-                    'Maximum 5 PDF files are allowed.',
+                    'College-wide notice submitted to the Principal for review and approval.',
                 )
             else:
-                invalid = any(
-                    not file.name.lower().endswith('.pdf')
-                    or file.size > 10 * 1024 * 1024
-                    for file in files
+                messages.success(
+                    request,
+                    'Notification created and published successfully.',
                 )
 
-                if invalid:
-                    notification.delete()
-                    messages.error(
-                        request,
-                        'Only PDF files up to 10 MB each are allowed.',
-                    )
-                else:
-                    for file in files:
-                        NotificationAttachment.objects.create(
-                            notification=notification,
-                            file=file,
-                        )
+            if (
+                status == 'PUBLISHED'
+                and publish_at <= timezone.now()
+            ):
+                send_push_for_notification(notification)
 
-                    if status == 'PENDING':
-                        messages.success(
-                            request,
-                            'College-wide notice submitted to the '
-                            'principal for approval.',
-                        )
-                    else:
-                        messages.success(
-                            request,
-                            'Notification saved. It will appear at '
-                            'its publication time.',
-                        )
-
-                    if (
-                        status == 'PUBLISHED'
-                        and publish_at <= timezone.now()
-                    ):
-                        send_push_for_notification(notification)
-
-                    return redirect('notifications')
+            return redirect('notifications')
 
     return render(
         request,
@@ -631,17 +657,26 @@ def review_college_notices(request):
         if action == 'approve':
             notification.approval_status = 'PUBLISHED'
             notification.save(update_fields=['approval_status'])
-            messages.success(
-                request,
-                'College-wide notice approved and published.',
-            )
 
+            push_sent = False
             if notification.publish_at <= timezone.now():
-                send_push_for_notification(notification)
+                push_sent = send_push_for_notification(notification)
+
+            if push_sent:
+                messages.success(
+                    request,
+                    f'Notice "{notification.title}" approved, published, and push notifications delivered.',
+                )
+            else:
+                messages.success(
+                    request,
+                    f'Notice "{notification.title}" approved and published.',
+                )
 
         elif action == 'reject':
+            title = notification.title
             notification.delete()
-            messages.success(request, 'Notice request rejected.')
+            messages.info(request, f'Notice request "{title}" has been rejected.')
         else:
             messages.error(request, 'Invalid action.')
 
@@ -742,26 +777,34 @@ def send_push_for_notification(notification):
         print("[PUSH DEBUG] VAPID private key could not be loaded.")
         return False
 
-    target_role = (
-        'Faculty' if notification.audience == 'STAFF' else 'Student'
-    )
+    # Determine recipient roles based on audience
+    if notification.audience == 'STAFF':
+        target_roles = ['Faculty', 'Admin']
+    elif notification.audience == 'STUDENTS':
+        target_roles = ['Student', 'Faculty', 'Admin']
+    else:  # 'ALL'
+        target_roles = ['Student', 'Faculty', 'Admin']
 
     subscriptions = PushSubscription.objects.select_related(
         'user',
         'user__profile',
     ).filter(
         user__profile__is_approved=True,
-        user__profile__role=target_role,
+        user__profile__role__in=target_roles,
     )
 
-    if not notification.is_college_wide:
+    if not notification.is_college_wide and notification.department:
+        # Include Admin (for institutional oversight), plus users in this department
         subscriptions = subscriptions.filter(
-            user__profile__department=notification.department,
+            Q(user__profile__role='Admin')
+            | Q(user__profile__department=notification.department)
         )
 
-        if notification.audience == 'STUDENTS' and notification.semester:
+        if notification.semester:
+            # Students must match semester; Faculty and Admin always receive department updates
             subscriptions = subscriptions.filter(
-                user__profile__semester=notification.semester,
+                Q(user__profile__role__in=['Faculty', 'Admin'])
+                | Q(user__profile__semester__in=[notification.semester, ''])
             )
 
     payload = json.dumps({
@@ -772,8 +815,8 @@ def send_push_for_notification(notification):
 
     subscription_count = subscriptions.count()
     print(f"[PUSH DEBUG] Notification: '{notification.title}' | Audience: {notification.audience}")
-    print(f"[PUSH DEBUG] Target role: {target_role} | Department: {notification.department or 'College-wide'}")
-    print(f"[PUSH DEBUG] Matching subscriptions: {subscription_count}")
+    print(f"[PUSH DEBUG] Department: {notification.department or 'College-wide'} | Semester: {notification.semester or 'All'}")
+    print(f"[PUSH DEBUG] Matching subscriptions count: {subscription_count}")
 
     if subscription_count == 0:
         print("[PUSH DEBUG] No matching subscriptions found.")
@@ -827,20 +870,21 @@ def download_attachment(request, attachment_id):
         pk=attachment_id,
     )
     notice = attachment.notification
+    role = role_of(request.user)
 
     try:
         profile = request.user.profile
     except Profile.DoesNotExist:
         return HttpResponseForbidden('No DNMS profile.')
 
-    if profile.role == 'Student' and not profile.is_approved:
+    if role == 'Student' and not profile.is_approved:
         return HttpResponseForbidden('Account awaiting approval.')
 
-    if profile.role == 'Student':
+    if role == 'Student':
         allowed = (
             notice.approval_status == 'PUBLISHED'
             and notice.publish_at <= timezone.now()
-            and notice.audience == 'STUDENTS'
+            and notice.audience in ('STUDENTS', 'ALL')
             and (
                 notice.is_college_wide
                 or (
@@ -849,7 +893,7 @@ def download_attachment(request, attachment_id):
                 )
             )
         )
-    elif profile.role == 'Faculty':
+    elif role == 'Faculty':
         allowed = (
             notice.approval_status == 'PUBLISHED'
             and notice.publish_at <= timezone.now()
@@ -859,20 +903,99 @@ def download_attachment(request, attachment_id):
             )
         )
     else:
-        allowed = role_of(request.user) == 'Admin'
+        allowed = (role == 'Admin')
 
     if not allowed:
         return HttpResponseForbidden(
-            'You are not allowed to download this attachment.'
+            'You are not allowed to access this attachment.'
         )
 
-    response = FileResponse(
-        attachment.file.open('rb'),
-        as_attachment=True,
-        filename=attachment.file.name.rsplit('/', 1)[-1],
-    )
-    response['X-Content-Type-Options'] = 'nosniff'
-    return response
+    # Check file existence on disk
+    try:
+        if not attachment.file or not os.path.exists(attachment.file.path):
+            messages.error(
+                request,
+                'The attachment file is currently unavailable on the server.'
+            )
+            return redirect('notification_detail', notification_id=notice.id)
+    except Exception:
+        pass
+
+    try:
+        is_preview = request.GET.get('view') == '1'
+        clean_filename = attachment.file.name.rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
+        response = FileResponse(
+            attachment.file.open('rb'),
+            as_attachment=not is_preview,
+            filename=clean_filename,
+            content_type='application/pdf',
+        )
+        response['X-Content-Type-Options'] = 'nosniff'
+        return response
+    except (FileNotFoundError, OSError, ValueError):
+        messages.error(
+            request,
+            'The requested attachment file could not be opened.'
+        )
+        return redirect('notification_detail', notification_id=notice.id)
+
+
+@login_required
+@require_POST
+def test_push_view(request):
+    subscription = PushSubscription.objects.filter(user=request.user).last()
+    if not subscription:
+        return JsonResponse({
+            'ok': False,
+            'error': 'No active push subscription found for your account. Please click "Enable Push Notifications" first.'
+        }, status=400)
+
+    vapid = get_vapid_key()
+    if not vapid:
+        return JsonResponse({
+            'ok': False,
+            'error': 'Server VAPID keys could not be loaded.'
+        }, status=500)
+
+    try:
+        from pywebpush import webpush
+    except ImportError:
+        return JsonResponse({'ok': False, 'error': 'pywebpush is not installed.'}, status=500)
+
+    payload = json.dumps({
+        'title': 'DNMS Push Test Alert',
+        'body': f'Hello {request.user.username}! Push notifications are successfully connected to your device.',
+        'url': '/dashboard/',
+    })
+
+    try:
+        resp = webpush(
+            subscription_info={
+                'endpoint': subscription.endpoint,
+                'keys': {
+                    'p256dh': subscription.p256dh,
+                    'auth': subscription.auth,
+                },
+            },
+            data=payload,
+            vapid_private_key=vapid,
+            vapid_claims={
+                'sub': os.environ.get(
+                    'VAPID_SUBJECT',
+                    'mailto:admin@example.com',
+                ),
+            },
+        )
+        return JsonResponse({'ok': True, 'status': resp.status_code})
+    except Exception as exc:
+        response = getattr(exc, 'response', None)
+        status_code = response.status_code if response is not None else 500
+        if status_code in (404, 410):
+            subscription.delete()
+        return JsonResponse({
+            'ok': False,
+            'error': f'Delivery error ({status_code}): {exc}'
+        }, status=status_code)
 
 
 @require_POST
@@ -966,7 +1089,7 @@ def notification_detail(request, notification_id):
 
         if role == 'Student':
             allowed = allowed and (
-                notification.audience == 'STUDENTS'
+                notification.audience in ('STUDENTS', 'ALL')
                 and (
                     notification.is_college_wide
                     or (

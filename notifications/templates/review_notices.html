@@ -148,6 +148,13 @@
 <body>
     <main class="container">
 
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <a href="{% url 'dashboard' %}" style="color: #5a1b2d; font-weight: bold; text-decoration: none;">← Back to Dashboard</a>
+            <div style="display: flex; gap: 12px;">
+                <a href="{% url 'notifications' %}" style="color: #5a1b2d; text-decoration: none; font-weight: bold;">Notifications</a>
+                <a href="{% url 'create_notification' %}" style="background: #5a1b2d; color: #fff; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 13px;">➕ Create Notice</a>
+            </div>
+        </div>
         <header class="header">
             <h1>Review College Notices</h1>
             <p>Review faculty requests before they are published.</p>
@@ -178,11 +185,7 @@
 
                         <p class="detail">
                             <strong>Audience:</strong>
-                            {% if notice.audience == 'STAFF' %}
-                                Faculty
-                            {% else %}
-                                Students
-                            {% endif %}
+                            {% if notice.audience == 'STAFF' %}Staff / Faculty{% elif notice.audience == 'STUDENTS' %}Students{% else %}All Users (Students & Staff){% endif %}
                         </p>
 
                         <p class="detail">
@@ -239,8 +242,9 @@
                         {% if notice.attachments.all %}
                             {% for attachment in notice.attachments.all %}
                                 <p class="detail">
-                                    PDF attachment:
-                                    {{ attachment.file.name }}
+                                    PDF Attachment: <strong>{{ attachment.file.name|cut:"notice_pdfs/" }}</strong> &nbsp;
+                                    <a href="{% url 'download_attachment' attachment.id %}?view=1" target="_blank" style="color: #246b4a; font-weight: bold; text-decoration: underline;">👁️ View</a> |
+                                    <a href="{% url 'download_attachment' attachment.id %}" style="color: #246b4a; font-weight: bold; text-decoration: underline;">⬇️ Download</a>
                                 </p>
                             {% endfor %}
                         {% endif %}

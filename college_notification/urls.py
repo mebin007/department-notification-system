@@ -82,6 +82,11 @@ urlpatterns = [
         views.push_public_key,
         name='push_public_key',
     ),
+    path(
+        'push/test/',
+        views.test_push_view,
+        name='test_push',
+    ),
 
     path(
         'service-worker.js',
