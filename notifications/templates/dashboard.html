@@ -840,8 +840,157 @@
         </p>
 
     </footer>
+    <div style="text-align: center; padding: 20px;">
+    <button
+        id="enable-push-notifications"
+        type="button"
+        style="
+            background: #5a1726;
+            color: #f5efe6;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+        "
+    >
+        Enable Push Notifications
+    </button>
+
+    <p id="push-status" role="status" style="margin-top: 10px;"></p>
+</div>
+<form id="push-csrf-form" hidden>
+    {% csrf_token %}
+</form>
 
 
 </body>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async function () {
+            try {
+                const registration =
+                    await navigator.serviceWorker.register('/service-worker.js');
+
+                console.log('DNMS service worker registered:', registration.scope);
+            } catch (error) {
+                console.error('DNMS service worker registration failed:', error);
+            }
+        });
+    }
+</script>
+
+<script>
+    const pushButton = document.getElementById('enable-push-notifications');
+    const pushStatus = document.getElementById('push-status');
+
+    function setPushStatus(message) {
+        pushStatus.textContent = message;
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = atob(base64);
+        const output = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; i++) {
+            output[i] = rawData.charCodeAt(i);
+        }
+
+        return output;
+    }
+
+    pushButton.addEventListener('click', async function () {
+        pushButton.disabled = true;
+        setPushStatus('Enabling notifications...');
+
+        try {
+            if (
+                !('Notification' in window) ||
+                !('serviceWorker' in navigator) ||
+                !('PushManager' in window)
+            ) {
+                throw new Error(
+                    'Push notifications are not supported by this browser.'
+                );
+            }
+
+            const permission = await Notification.requestPermission();
+
+            if (permission !== 'granted') {
+                throw new Error(
+                    'Notification permission was not granted. Check your browser settings.'
+                );
+            }
+
+            const keyResponse = await fetch('/push/public-key/');
+
+            if (!keyResponse.ok) {
+                throw new Error('Could not retrieve the push notification key.');
+            }
+
+            const keyData = await keyResponse.json();
+
+            if (!keyData.publicKey) {
+                throw new Error(
+                    'The server public key is missing. Check your server configuration.'
+                );
+            }
+
+            const registration = await navigator.serviceWorker.ready;
+
+            let subscription =
+                await registration.pushManager.getSubscription();
+
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey:
+                        urlBase64ToUint8Array(keyData.publicKey)
+                });
+            }
+
+            const csrfToken = document.querySelector(
+                '#push-csrf-form [name="csrfmiddlewaretoken"]'
+            )?.value;
+
+            if (!csrfToken) {
+                throw new Error(
+                    'Django security token not found. Refresh the page and try again.'
+                );
+            }
+
+            const saveResponse = await fetch('/push/subscribe/', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(subscription.toJSON())
+            });
+
+            const result = await saveResponse.json();
+
+            if (!saveResponse.ok || !result.ok) {
+                throw new Error(
+                    result.error || 'The server could not save your subscription.'
+                );
+            }
+
+            setPushStatus('Notifications enabled successfully!');
+        } catch (error) {
+            console.error('DNMS push notification error:', error);
+            setPushStatus(error.message || 'Could not enable notifications.');
+        } finally {
+            pushButton.disabled = false;
+        }
+    });
+</script>
+
 
 </html>

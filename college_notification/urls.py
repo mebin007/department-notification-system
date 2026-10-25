@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 from django.urls import path
 from django.conf import settings
@@ -13,10 +12,8 @@ from notifications import views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Home
     path('', views.home, name='home'),
 
-    # Departments
     path(
         'departments/',
         views.departments,
@@ -28,9 +25,13 @@ urlpatterns = [
         name='department_detail',
     ),
 
-    # Dashboard and notifications
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('notifications/', views.notifications, name='notifications'),
+
+    path(
+        'notifications/',
+        views.notifications,
+        name='notifications',
+    ),
     path(
         'notifications/create/',
         views.create_notification,
@@ -41,21 +42,19 @@ urlpatterns = [
         views.review_college_notices,
         name='review_college_notices',
     ),
+    path(
+        'notifications/<int:notification_id>/',
+        views.notification_detail,
+        name='notification_detail',
+    ),
 
-    # Authentication
     path('login/', views.login, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
 
-    # Profile
     path('profile/', views.profile, name='profile'),
-    path(
-        'profile/edit/',
-        views.edit_profile,
-        name='edit_profile',
-    ),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
 
-    # Staff and student management
     path(
         'staff/manage/',
         views.staff_management,
@@ -67,14 +66,12 @@ urlpatterns = [
         name='student_management',
     ),
 
-    # Attachments
     path(
         'attachments/<int:attachment_id>/download/',
         views.download_attachment,
         name='download_attachment',
     ),
 
-    # Push notifications
     path(
         'push/subscribe/',
         views.save_push_subscription,
@@ -83,12 +80,11 @@ urlpatterns = [
     path(
         'push/public-key/',
         lambda request: JsonResponse({
-            'publicKey': os.environ.get('VAPID_PUBLIC_KEY', '')
+            'publicKey': os.environ.get('VAPID_PUBLIC_KEY', ''),
         }),
         name='push_public_key',
     ),
 
-    # Service worker
     path(
         'service-worker.js',
         TemplateView.as_view(
@@ -97,7 +93,6 @@ urlpatterns = [
         ),
     ),
 ]
-
 
 if settings.DEBUG:
     urlpatterns += static(

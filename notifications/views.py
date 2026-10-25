@@ -1,3 +1,4 @@
+
 import json
 import os
 from functools import wraps
@@ -662,11 +663,13 @@ def send_push_for_notification(notification):
         not os.environ.get('VAPID_PRIVATE_KEY')
         or not os.environ.get('VAPID_PUBLIC_KEY')
     ):
+        print("[PUSH DEBUG] VAPID keys are missing.")
         return False
 
     try:
         from pywebpush import webpush
     except ImportError:
+        print("[PUSH DEBUG] pywebpush is not installed.")
         return False
 
     target_role = (
@@ -697,6 +700,25 @@ def send_push_for_notification(notification):
         'url': '/notifications/',
     })
 
+    subscription_count = subscriptions.count()
+    print(
+        f"[PUSH DEBUG] Notification audience: {notification.audience}"
+    )
+    print(
+        f"[PUSH DEBUG] Target role: {target_role}"
+    )
+    print(
+        f"[PUSH DEBUG] Matching subscriptions: {subscription_count}"
+    )
+
+    if subscription_count == 0:
+        print("[PUSH DEBUG] No matching subscriptions found.")
+        notification.push_sent = False
+        notification.save(update_fields=['push_sent'])
+        return False
+
+    successful_sends = 0
+
     for subscription in subscriptions:
         try:
             webpush(
@@ -716,14 +738,29 @@ def send_push_for_notification(notification):
                     ),
                 },
             )
+            successful_sends += 1
+            print(
+                "[PUSH DEBUG] Push accepted by the push service."
+            )
+
         except Exception as exc:
+            print(f"[PUSH DEBUG] Delivery failed: {exc}")
             response = getattr(exc, 'response', None)
+
             if response is not None and response.status_code in (404, 410):
                 subscription.delete()
+                print(
+                    "[PUSH DEBUG] Removed an expired subscription."
+                )
 
-    notification.push_sent = True
+    notification.push_sent = successful_sends > 0
     notification.save(update_fields=['push_sent'])
-    return True
+
+    print(
+        f"[PUSH DEBUG] Successful sends: {successful_sends}"
+    )
+
+    return successful_sends > 0
 
 
 @login_required
@@ -849,5 +886,59 @@ def edit_profile(request):
             'profile': user_profile,
             'departments': get_department_names(),
             'semesters': SEMESTERS,
+        },
+    )
+
+
+@require_roles('Admin', 'Faculty', 'Student')
+def notification_detail(request, notification_id):
+    profile = request.user.profile
+    role = role_of(request.user)
+
+    notification = get_object_or_404(
+        Notification,
+        pk=notification_id,
+    )
+
+    # Admin can view any notification, including pending notices.
+    if role != 'Admin':
+        allowed = (
+            notification.approval_status == 'PUBLISHED'
+            and notification.publish_at <= timezone.now()
+        )
+
+        if role == 'Student':
+            allowed = allowed and (
+                notification.audience == 'STUDENTS'
+                and (
+                    notification.is_college_wide
+                    or (
+                        notification.department == profile.department
+                        and notification.semester in (
+                            '',
+                            profile.semester,
+                        )
+                    )
+                )
+            )
+
+        elif role == 'Faculty':
+            allowed = allowed and (
+                notification.is_college_wide
+                or notification.department == profile.department
+            )
+
+        if not allowed:
+            return HttpResponseForbidden(
+                'You are not allowed to view this notification.'
+            )
+
+    return render(
+        request,
+        'notification_detail.html',
+        {
+            'notification': notification,
+            'attachments': notification.attachments.all(),
+            'role': role,
         },
     )
