@@ -693,6 +693,15 @@ def review_college_notices(request):
     )
 
 
+DEFAULT_VAPID_PRIVATE_KEY_PEM = """-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg8bYen+X5T2dV19Jy
++Bg8rm2eXeVFfsaXZVhxV6MRP6GhRANCAAQC0J0ak173jOwBcY4JUbeOsFJcPbpK
+lxRb6/Ej1iHbBOVY6A0kVE71UpEoaGqCm5rnJeYuf5OwHb4iUwXlgTo2
+-----END PRIVATE KEY-----"""
+
+DEFAULT_VAPID_PUBLIC_KEY = 'BALQnRqTXveM7AFxjglRt46wUlw9ukqXFFvr8SPWIdsE5VjoDSRUTvVSkShoaoKbmucl5i5_k7AdviJTBeWBOjY'
+
+
 def get_vapid_key():
     try:
         from py_vapid import Vapid02 as Vapid
@@ -735,7 +744,12 @@ def get_vapid_key():
         except Exception:
             pass
 
-    return None
+    # Built-in fallback ensuring Render works out-of-the-box
+    try:
+        return Vapid.from_pem(DEFAULT_VAPID_PRIVATE_KEY_PEM.encode('utf-8'))
+    except Exception as exc:
+        print(f"[VAPID ERROR]: {exc}")
+        return None
 
 
 def get_vapid_public_key():
@@ -756,7 +770,7 @@ def get_vapid_public_key():
         except Exception:
             pass
 
-    return 'BALQnRqTXveM7AFxjglRt46wUlw9ukqXFFvr8SPWIdsE5VjoDSRUTvVSkShoaoKbmucl5i5_k7AdviJTBeWBOjY'
+    return DEFAULT_VAPID_PUBLIC_KEY
 
 
 def push_public_key(request):

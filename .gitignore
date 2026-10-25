@@ -11,4 +11,3 @@ db.sqlite3
 # Django generated files
 staticfiles/
 media/
-vapid_private.pem
