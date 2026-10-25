@@ -958,3 +958,27 @@ fieldset h2 {
 </style>
 
 {% endblock %}
+
+{% block branding %}
+<div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 15px; padding: 6px 0;">
+    <h1 id="site-name" style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 2px;">
+        <a href="{% url 'admin:index' %}" style="color: var(--cream); text-decoration: none;">
+            DN<span style="color: #dfb2bc;">MS</span> Administration
+        </a>
+    </h1>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <a href="{% url 'dashboard' %}" style="background: var(--cream); color: var(--burgundy-dark); font-weight: bold; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            🏠 User Dashboard
+        </a>
+        <a href="{% url 'notifications' %}" style="background: rgba(255,255,255,0.15); color: var(--cream); font-weight: bold; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 13px;">
+            🔔 Notifications Feed
+        </a>
+        <a href="{% url 'create_notification' %}" style="background: rgba(255,255,255,0.15); color: var(--cream); font-weight: bold; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 13px;">
+            ➕ Create Notice
+        </a>
+        <a href="{% url 'review_college_notices' %}" style="background: rgba(255,255,255,0.15); color: var(--cream); font-weight: bold; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 13px;">
+            📋 Approvals
+        </a>
+    </div>
+</div>
+{% endblock %}

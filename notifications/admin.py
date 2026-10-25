@@ -123,12 +123,21 @@ class NotificationAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         # Trigger push notification if the notice is published
-        if obj.approval_status == 'PUBLISHED' and not obj.push_sent:
+        if obj.approval_status == 'PUBLISHED':
             try:
                 from .views import send_push_for_notification
                 send_push_for_notification(obj)
             except Exception as e:
                 print(f'[PUSH ERROR in Admin save_model]: {e}')
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        if form.instance.approval_status == 'PUBLISHED' and not form.instance.push_sent:
+            try:
+                from .views import send_push_for_notification
+                send_push_for_notification(form.instance)
+            except Exception as e:
+                print(f'[PUSH ERROR in Admin save_related]: {e}')
 
 
 @admin.register(Profile)

@@ -261,6 +261,12 @@ def dashboard(request):
         user=request.user
     ).exists()
 
+    recent_notifications = visible.prefetch_related('attachments').order_by(
+        '-is_pinned',
+        '-is_important',
+        '-publish_at',
+    )[:8]
+
     return render(
         request,
         'dashboard.html',
@@ -275,6 +281,7 @@ def dashboard(request):
             'pending_students_count': pending_students_count,
             'role': role,
             'user_has_push_subscription': user_has_push_subscription,
+            'recent_notifications': recent_notifications,
         },
     )
 
@@ -535,11 +542,20 @@ def create_notification(request):
         if publish_at_raw:
             parsed = parse_datetime(publish_at_raw)
             if parsed:
-                publish_at = (
+                parsed_aware = (
                     timezone.make_aware(parsed)
                     if timezone.is_naive(parsed)
                     else parsed
                 )
+                # If chosen time is within 24 hours of UTC now (e.g. current day in local timezone),
+                # align to timezone.now() so it appears immediately and triggers push
+                if (
+                    parsed_aware > timezone.now()
+                    and (parsed_aware - timezone.now()).total_seconds() <= 86400
+                ):
+                    publish_at = timezone.now()
+                else:
+                    publish_at = parsed_aware
 
         files = request.FILES.getlist('pdf_files')
 
@@ -624,10 +640,11 @@ def create_notification(request):
                     'Notification created and published successfully.',
                 )
 
-            if (
-                status == 'PUBLISHED'
-                and publish_at <= timezone.now()
-            ):
+            if status == 'PUBLISHED':
+                if publish_at > timezone.now() and (publish_at - timezone.now()).total_seconds() <= 86400:
+                    publish_at = timezone.now()
+                    notification.publish_at = publish_at
+                    notification.save(update_fields=['publish_at'])
                 send_push_for_notification(notification)
 
             return redirect('notifications')
@@ -791,39 +808,48 @@ def send_push_for_notification(notification):
         print("[PUSH DEBUG] VAPID private key could not be loaded.")
         return False
 
-    # Determine recipient roles based on audience
+    # 1. Base filter: always include Superusers, Admins, and the Author
+    # so the creator gets immediate delivery confirmation on their own active device
+    admin_filter = Q(user__is_superuser=True) | Q(user__profile__role='Admin')
+    if notification.author:
+        admin_filter |= Q(user=notification.author)
+
+    # 2. Audience filter
     if notification.audience == 'STAFF':
-        target_roles = ['Faculty', 'Admin']
+        audience_filter = admin_filter | Q(user__profile__role='Faculty', user__profile__is_approved=True)
     elif notification.audience == 'STUDENTS':
-        target_roles = ['Student', 'Faculty', 'Admin']
+        audience_filter = (
+            admin_filter
+            | Q(user__profile__role='Student', user__profile__is_approved=True)
+            | Q(user__profile__role='Faculty', user__profile__is_approved=True)
+        )
     else:  # 'ALL'
-        target_roles = ['Student', 'Faculty', 'Admin']
+        audience_filter = admin_filter | Q(user__profile__is_approved=True)
 
     subscriptions = PushSubscription.objects.select_related(
         'user',
         'user__profile',
-    ).filter(
-        user__profile__is_approved=True,
-        user__profile__role__in=target_roles,
-    )
+    ).filter(audience_filter)
 
+    # 3. Department and Semester filtering
     if not notification.is_college_wide and notification.department:
-        # Include Admin (for institutional oversight), plus users in this department
+        dept_val = notification.department.strip()
         subscriptions = subscriptions.filter(
-            Q(user__profile__role='Admin')
-            | Q(user__profile__department=notification.department)
+            admin_filter
+            | Q(user__profile__department__iexact=dept_val)
         )
 
         if notification.semester:
-            # Students must match semester; Faculty and Admin always receive department updates
             subscriptions = subscriptions.filter(
-                Q(user__profile__role__in=['Faculty', 'Admin'])
+                admin_filter
+                | Q(user__profile__role__in=['Faculty', 'Admin'])
                 | Q(user__profile__semester__in=[notification.semester, ''])
             )
 
+    body_text = notification.description.strip()[:180] if notification.description else 'A new college notification is available.'
     payload = json.dumps({
         'title': notification.title,
-        'body': notification.description[:180],
+        'body': body_text,
         'url': f'/notifications/{notification.id}/',
     })
 
