@@ -77,11 +77,75 @@ class NotificationAdminForm(forms.ModelForm):
             'Select target audience: All Users, Students Only, or Staff/Faculty Only.'
         )
 
+        # Make related_links user-friendly: accept plain URLs
+        if 'related_links' in self.fields:
+            self.fields['related_links'].required = False
+            self.fields['related_links'].help_text = (
+                'Paste one or more URLs (one per line). '
+                'They will be auto-converted to the required format.'
+            )
+            self.fields['related_links'].widget = forms.Textarea(attrs={
+                'rows': 3,
+                'cols': 80,
+                'placeholder': 'https://example.com/form\nhttps://example.com/doc',
+            })
+
     def clean_audience(self):
         audience = self.cleaned_data.get('audience')
         if audience not in ('ALL', 'STUDENTS', 'STAFF'):
             raise forms.ValidationError('Please choose a valid audience: All Users, Students, or Staff.')
         return audience
+
+    def clean_related_links(self):
+        """Auto-convert plain URLs or comma-separated URLs into proper JSON list.
+
+        Accepts:
+          - A valid JSON list of {label, url} objects (pass-through)
+          - A single URL string  → [{"label": "Link", "url": "<value>"}]
+          - Multiple URLs (one per line or comma-separated)
+          - Empty / blank → []
+        """
+        import json
+        import re
+
+        raw = self.cleaned_data.get('related_links')
+
+        # Already a list (JSONField successfully parsed it)
+        if isinstance(raw, list):
+            return raw
+
+        # None or empty
+        if raw is None:
+            return []
+
+        # If it's a string, try to handle it
+        if isinstance(raw, str):
+            raw = raw.strip()
+            if not raw:
+                return []
+
+            # Try parsing as JSON first
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return parsed
+                if isinstance(parsed, dict):
+                    return [parsed]
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+            # Not valid JSON – treat as plain URL(s)
+            # Split by newlines, commas, or spaces
+            url_pattern = re.compile(r'https?://\S+')
+            urls = url_pattern.findall(raw)
+
+            if urls:
+                return [{"label": f"Link {i+1}" if len(urls) > 1 else "Link", "url": u} for i, u in enumerate(urls)]
+
+            # Fallback: treat entire string as a single URL/text
+            return [{"label": "Link", "url": raw}]
+
+        return raw if raw else []
 
 
 @admin.register(Notification)
